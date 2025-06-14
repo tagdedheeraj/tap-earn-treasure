@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Gift, Coins, Star, Crown } from 'lucide-react';
+import { Calendar, Gift, Coins, Star, Crown, Sparkles } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useUserData } from '@/hooks/useUserData';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -16,13 +16,13 @@ const DailyRewards = () => {
   const [currentDay, setCurrentDay] = useState(1);
 
   const dailyRewards = [
-    { day: 1, reward: 50, type: 'coins', icon: Coins, color: 'bg-yellow-500' },
-    { day: 2, reward: 75, type: 'coins', icon: Coins, color: 'bg-yellow-500' },
-    { day: 3, reward: 100, type: 'coins', icon: Coins, color: 'bg-yellow-600' },
-    { day: 4, reward: 125, type: 'coins', icon: Coins, color: 'bg-yellow-600' },
-    { day: 5, reward: 150, type: 'coins', icon: Coins, color: 'bg-orange-500' },
-    { day: 6, reward: 200, type: 'coins', icon: Coins, color: 'bg-orange-600' },
-    { day: 7, reward: 500, type: 'bonus', icon: Crown, color: 'bg-purple-600' },
+    { day: 1, reward: 50, type: 'coins', icon: Coins, color: 'bg-yellow-500', bgGradient: 'from-yellow-400 to-yellow-500' },
+    { day: 2, reward: 75, type: 'coins', icon: Coins, color: 'bg-yellow-500', bgGradient: 'from-yellow-500 to-orange-400' },
+    { day: 3, reward: 100, type: 'coins', icon: Coins, color: 'bg-yellow-600', bgGradient: 'from-orange-400 to-orange-500' },
+    { day: 4, reward: 125, type: 'coins', icon: Coins, color: 'bg-yellow-600', bgGradient: 'from-orange-500 to-red-400' },
+    { day: 5, reward: 150, type: 'coins', icon: Coins, color: 'bg-orange-500', bgGradient: 'from-red-400 to-pink-400' },
+    { day: 6, reward: 200, type: 'coins', icon: Coins, color: 'bg-orange-600', bgGradient: 'from-pink-400 to-purple-400' },
+    { day: 7, reward: 500, type: 'bonus', icon: Crown, color: 'bg-purple-600', bgGradient: 'from-purple-500 to-indigo-600' },
   ];
 
   useEffect(() => {
@@ -108,108 +108,159 @@ const DailyRewards = () => {
   };
 
   return (
-    <Card className="bg-gradient-to-br from-blue-50 to-indigo-100 border-blue-200">
-      <CardHeader className="text-center">
-        <CardTitle className="flex items-center justify-center gap-2 text-blue-800">
-          <Calendar className="w-6 h-6 text-blue-600" />
-          Daily Login Rewards
-          <Gift className="w-6 h-6 text-blue-600" />
-        </CardTitle>
-        <div className="flex items-center justify-center gap-4 mt-2">
-          <Badge variant="outline" className="text-blue-700 border-blue-300">
-            <Star className="w-3 h-3 mr-1" />
-            {loginStreak} Day Streak
-          </Badge>
-          {getMultiplier() > 1 && (
-            <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white">
-              {getMultiplier()}x Multiplier
-            </Badge>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Daily Rewards Grid */}
-        <div className="grid grid-cols-7 gap-2">
-          {dailyRewards.map((reward, index) => {
-            const Icon = reward.icon;
-            const isToday = index + 1 === currentDay;
-            const isClaimed = index + 1 < currentDay || (index + 1 === currentDay && todaysClaimed);
-            const isFuture = index + 1 > currentDay;
-            
-            return (
-              <div
-                key={reward.day}
-                className={`relative p-3 rounded-lg border-2 text-center transition-all duration-300 ${
-                  isToday
-                    ? 'border-blue-500 bg-blue-100 shadow-lg scale-105'
-                    : isClaimed
-                    ? 'border-green-500 bg-green-100'
-                    : 'border-gray-300 bg-gray-50'
-                }`}
-              >
-                <div className={`w-8 h-8 rounded-full ${reward.color} mx-auto mb-2 flex items-center justify-center`}>
-                  <Icon className="w-4 h-4 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 p-4">
+      <div className="max-w-md mx-auto space-y-6">
+        {/* Enhanced Header Card */}
+        <Card className="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white border-0 shadow-2xl relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent animate-pulse"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-16 translate-x-16"></div>
+          
+          <CardHeader className="text-center relative z-10 pb-2">
+            <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold">
+              <Calendar className="w-8 h-8 text-yellow-300 animate-bounce" />
+              Daily Login Rewards
+              <Gift className="w-8 h-8 text-yellow-300 animate-bounce" style={{ animationDelay: '0.5s' }} />
+            </CardTitle>
+            <p className="text-blue-100 font-medium">Claim your daily bonus!</p>
+          </CardHeader>
+          
+          <CardContent className="pb-6 relative z-10">
+            <div className="flex items-center justify-center gap-6">
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2 bg-white/20 rounded-2xl px-4 py-2 backdrop-blur-sm border border-white/30">
+                  <Star className="w-5 h-5 text-yellow-300" />
+                  <span className="text-xl font-bold">{loginStreak}</span>
+                  <span className="text-sm text-blue-100">Day Streak</span>
                 </div>
-                <div className="text-xs font-bold text-gray-700">Day {reward.day}</div>
-                <div className="text-xs text-gray-600">{reward.reward}</div>
-                
-                {isClaimed && (
-                  <div className="absolute top-1 right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs">✓</span>
-                  </div>
-                )}
-                
-                {isToday && !todaysClaimed && (
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                )}
               </div>
-            );
-          })}
-        </div>
+              {getMultiplier() > 1 && (
+                <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1 text-sm font-bold">
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  {getMultiplier()}x Boost
+                </Badge>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Claim Button */}
+        {/* Rewards Grid - Mobile Optimized */}
+        <Card className="bg-white/80 backdrop-blur-lg border-white/50 shadow-xl">
+          <CardContent className="p-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-4 text-center">7-Day Reward Calendar</h3>
+            <div className="grid grid-cols-7 gap-2">
+              {dailyRewards.map((reward, index) => {
+                const Icon = reward.icon;
+                const isToday = index + 1 === currentDay;
+                const isClaimed = index + 1 < currentDay || (index + 1 === currentDay && todaysClaimed);
+                const isFuture = index + 1 > currentDay;
+                
+                return (
+                  <div
+                    key={reward.day}
+                    className={`relative p-2 rounded-xl border-2 text-center transition-all duration-300 ${
+                      isToday
+                        ? 'border-blue-500 bg-gradient-to-br from-blue-100 to-blue-200 shadow-lg scale-110 animate-pulse'
+                        : isClaimed
+                        ? 'border-green-500 bg-gradient-to-br from-green-100 to-green-200'
+                        : 'border-gray-300 bg-gradient-to-br from-gray-50 to-gray-100'
+                    }`}
+                  >
+                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${reward.bgGradient} mx-auto mb-1 flex items-center justify-center shadow-md`}>
+                      <Icon className="w-4 h-4 text-white drop-shadow-sm" />
+                    </div>
+                    <div className="text-xs font-bold text-gray-700">D{reward.day}</div>
+                    <div className="text-xs text-gray-600 font-semibold">{reward.reward}</div>
+                    
+                    {isClaimed && (
+                      <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+                        <span className="text-white text-xs">✓</span>
+                      </div>
+                    )}
+                    
+                    {isToday && !todaysClaimed && (
+                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Enhanced Claim Button */}
         <div className="text-center">
           {!todaysClaimed ? (
             <Button
               onClick={claimDailyReward}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-3 text-lg font-bold shadow-lg transform transition-transform hover:scale-105"
+              className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 text-white py-4 text-lg font-bold shadow-2xl transform transition-all duration-300 hover:scale-105 rounded-2xl border-4 border-white/20 relative overflow-hidden"
             >
-              <Gift className="w-5 h-5 mr-2" />
-              Claim Day {currentDay} Reward
+              <div className="absolute inset-0 bg-white/10 animate-pulse"></div>
+              <Gift className="w-6 h-6 mr-3 animate-bounce relative z-10" />
+              <span className="relative z-10">Claim Day {currentDay} Reward ({dailyRewards[currentDay - 1]?.reward} Coins)</span>
+              <Sparkles className="w-6 h-6 ml-3 animate-spin relative z-10" />
             </Button>
           ) : (
-            <div className="space-y-2">
-              <Button disabled className="bg-gray-400 text-gray-600 px-8 py-3 text-lg font-bold">
-                <Star className="w-5 h-5 mr-2" />
-                Today's Reward Claimed!
+            <div className="space-y-3">
+              <Button disabled className="w-full bg-gradient-to-r from-gray-400 to-gray-500 text-white py-4 text-lg font-bold rounded-2xl border-4 border-gray-300 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-400/20"></div>
+                <Star className="w-6 h-6 mr-3 relative z-10" />
+                <span className="relative z-10">Today's Reward Claimed!</span>
+                <Crown className="w-6 h-6 ml-3 relative z-10" />
               </Button>
-              <p className="text-sm text-gray-600">
-                Come back tomorrow for Day {Math.min(currentDay + 1, 7)} reward
+              <p className="text-gray-600 font-medium">
+                Come back tomorrow for Day {Math.min(currentDay + 1, 7)} reward 
+                <span className="text-purple-600 font-bold">
+                  {currentDay < 7 ? ` (${dailyRewards[currentDay]?.reward} Coins)` : ' (Streak Reset)'}
+                </span>
               </p>
             </div>
           )}
         </div>
 
-        {/* Streak Info */}
-        <div className="bg-white/50 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-800 mb-2 text-center">Streak Benefits:</h4>
-          <div className="space-y-2 text-sm text-blue-700">
-            <div className="flex justify-between items-center">
-              <span>3+ Days:</span>
-              <Badge variant="outline">1.5x Mining Speed</Badge>
+        {/* Enhanced Streak Benefits */}
+        <Card className="bg-gradient-to-br from-white/90 to-white/70 backdrop-blur-lg border-white/50 shadow-xl">
+          <CardContent className="p-6">
+            <h4 className="font-bold text-gray-800 mb-4 text-center text-lg flex items-center justify-center gap-2">
+              <Sparkles className="w-5 h-5 text-purple-500" />
+              Streak Benefits
+              <Sparkles className="w-5 h-5 text-purple-500" />
+            </h4>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center p-3 bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl border border-green-200">
+                <span className="font-medium text-green-800">3+ Days Streak:</span>
+                <Badge className="bg-green-500 text-white font-bold">1.5x Mining Speed</Badge>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-xl border border-blue-200">
+                <span className="font-medium text-blue-800">7+ Days Streak:</span>
+                <Badge className="bg-blue-500 text-white font-bold">2x Mining Speed</Badge>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl border border-purple-200">
+                <span className="font-medium text-purple-800">Complete Week:</span>
+                <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold">500 Bonus Coins</Badge>
+              </div>
             </div>
-            <div className="flex justify-between items-center">
-              <span>7+ Days:</span>
-              <Badge variant="outline">2x Mining Speed</Badge>
+          </CardContent>
+        </Card>
+
+        {/* Progress Indicator */}
+        <Card className="bg-gradient-to-r from-yellow-100 to-orange-100 border-yellow-200 shadow-lg">
+          <CardContent className="p-4">
+            <div className="text-center">
+              <div className="text-sm text-orange-800 font-medium mb-2">Weekly Progress</div>
+              <div className="w-full bg-white/70 rounded-full h-3 mb-2">
+                <div 
+                  className="bg-gradient-to-r from-yellow-400 to-orange-500 h-3 rounded-full transition-all duration-500 shadow-inner"
+                  style={{ width: `${(currentDay / 7) * 100}%` }}
+                ></div>
+              </div>
+              <div className="text-xs text-orange-700 font-bold">
+                {currentDay}/7 Days • {Math.round((currentDay / 7) * 100)}% Complete
+              </div>
             </div>
-            <div className="flex justify-between items-center">
-              <span>Complete Week:</span>
-              <Badge className="bg-purple-500">500 Bonus Points</Badge>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
 

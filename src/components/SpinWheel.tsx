@@ -113,45 +113,71 @@ const SpinWheel = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 p-4 relative overflow-hidden">
       <SpinWheelBackground />
 
-      <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border-white/20 shadow-2xl max-w-md mx-auto relative z-10">
-        <CardHeader className="text-center bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 text-white rounded-t-lg relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent animate-pulse"></div>
-          <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold relative z-10">
-            <div className="animate-spin">
-              <Sparkles className="w-8 h-8 text-yellow-300" />
-            </div>
-            Lucky Spin Wheel
-            <div className="animate-spin">
-              <Sparkles className="w-8 h-8 text-yellow-300" />
-            </div>
-          </CardTitle>
-          <p className="text-purple-100 relative z-10 font-medium">Spin daily for amazing rewards!</p>
-        </CardHeader>
-        
-        <CardContent className="space-y-8 p-6">
+      <div className="max-w-md mx-auto space-y-6 relative z-10">
+        {/* Enhanced Header */}
+        <Card className="bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl border-white/30 shadow-2xl">
+          <CardHeader className="text-center bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 text-white rounded-t-lg relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent animate-pulse"></div>
+            <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold relative z-10">
+              <div className="animate-spin">
+                <Sparkles className="w-8 h-8 text-yellow-300" />
+              </div>
+              Lucky Spin Wheel
+              <div className="animate-spin" style={{ animationDirection: 'reverse' }}>
+                <Sparkles className="w-8 h-8 text-yellow-300" />
+              </div>
+            </CardTitle>
+            <p className="text-purple-100 relative z-10 font-medium">Spin daily for amazing rewards!</p>
+          </CardHeader>
+        </Card>
+
+        {/* Wheel Container */}
+        <div className="flex justify-center">
           <WheelContainer 
             rewards={rewards}
             rotation={rotation}
             isSpinning={isSpinning}
             wonAmount={wonAmount}
           />
+        </div>
 
-          <SpinButton 
-            canSpin={canSpin}
-            isSpinning={isSpinning}
-            onSpin={handleSpin}
-            getTimeUntilNextSpin={getTimeUntilNextSpin}
-          />
+        {/* Spin Button */}
+        <SpinButton 
+          canSpin={canSpin}
+          isSpinning={isSpinning}
+          onSpin={handleSpin}
+          getTimeUntilNextSpin={getTimeUntilNextSpin}
+        />
 
-          <RewardsInfo 
-            rewards={rewards}
-            getRarityBorderColor={getRarityBorderColor}
-          />
-        </CardContent>
-      </Card>
+        {/* Rewards Info */}
+        <RewardsInfo 
+          rewards={rewards}
+          getRarityBorderColor={getRarityBorderColor}
+        />
+
+        {/* Quick Stats */}
+        <Card className="bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl border-white/30 shadow-xl">
+          <CardContent className="p-4">
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="bg-gradient-to-br from-yellow-400/20 to-orange-400/20 rounded-xl p-3 backdrop-blur-sm border border-yellow-400/30">
+                <div className="text-2xl font-black text-yellow-300 mb-1">1</div>
+                <div className="text-xs text-white/80 font-medium">Daily Spin</div>
+              </div>
+              <div className="bg-gradient-to-br from-green-400/20 to-emerald-400/20 rounded-xl p-3 backdrop-blur-sm border border-green-400/30">
+                <div className="text-2xl font-black text-green-300 mb-1">50</div>
+                <div className="text-xs text-white/80 font-medium">Max Reward</div>
+              </div>
+              <div className="bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-xl p-3 backdrop-blur-sm border border-purple-400/30">
+                <div className="text-2xl font-black text-purple-300 mb-1">FREE</div>
+                <div className="text-xs text-white/80 font-medium">Every Day</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
