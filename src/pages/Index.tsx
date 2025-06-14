@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -32,6 +33,14 @@ const Index = () => {
     { id: 'profile', label: 'Profile', icon: Users, gradient: 'from-indigo-500 to-purple-500' },
   ];
 
+  const handleNavigateToQuiz = () => {
+    setActiveTab('quiz');
+    toast({
+      title: "🧠 Quiz Time!",
+      description: "Answer questions correctly to earn points!",
+    });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 flex items-center justify-center">
@@ -57,7 +66,7 @@ const Index = () => {
           </div>
         );
       case 'tasks':
-        return <TasksList />;
+        return <TasksList onNavigateToQuiz={handleNavigateToQuiz} />;
       case 'quiz':
         return <QuizSection />;
       case 'rewards':

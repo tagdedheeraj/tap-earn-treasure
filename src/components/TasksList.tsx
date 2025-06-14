@@ -4,17 +4,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, Clock, Play, Trophy, Users, Calendar, Gift, Zap, Star } from 'lucide-react';
+import { CheckCircle, Clock, Play, Trophy, Users, Calendar, Gift, Zap, Star, BookOpen } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useUserData } from '@/hooks/useUserData';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
-const TasksList: React.FC = () => {
+interface TasksListProps {
+  onNavigateToQuiz?: () => void;
+}
+
+const TasksList: React.FC<TasksListProps> = ({ onNavigateToQuiz }) => {
   const { wallet, updateCoins } = useUserData();
   const { user } = useAuth();
   const [loginStreakProgress, setLoginStreakProgress] = useState(0);
-  const [rewardClaimed, setRewardClaimed] = useState(false);
+  const [weeklyProgress, setWeeklyProgress] = useState(0);
+  const [quizCompleted, setQuizCompleted] = useState(false);
   const [tasks, setTasks] = useState([
     {
       id: 1,
@@ -31,13 +36,13 @@ const TasksList: React.FC = () => {
     {
       id: 2,
       title: 'Complete Daily Quiz',
-      description: 'Answer 5 questions correctly',
+      description: 'Answer quiz questions correctly to earn points',
       reward: 20,
       progress: 0,
       total: 1,
       type: 'daily',
       completed: false,
-      icon: Trophy,
+      icon: BookOpen,
       color: 'from-blue-400 to-blue-600',
     },
     {
@@ -80,83 +85,162 @@ const TasksList: React.FC = () => {
 
   useEffect(() => {
     if (user) {
-      fetchLoginStreakProgress();
+      fetchTaskProgress();
     }
   }, [user]);
 
-  const fetchLoginStreakProgress = async () => {
+  const fetchTaskProgress = async () => {
     if (!user) return;
 
     try {
-      const { data: loginStreakTask, error } = await supabase
+      // Fetch login streak progress
+      const { data: loginStreakTask } = await supabase
         .from('user_tasks')
         .select('*')
         .eq('user_id', user.id)
         .eq('task_type', 'login_streak')
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching login streak:', error);
-        return;
-      }
+      const streakProgress = loginStreakTask?.completed_count || 0;
+      setLoginStreakProgress(streakProgress);
 
-      const progress = loginStreakTask?.completed_count || 0;
-      const isCompleted = progress >= 7;
-      
-      setLoginStreakProgress(progress);
-      
-      // Track if reward was already claimed (using a local state for now)
-      if (progress === 7 && !rewardClaimed) {
-        setRewardClaimed(true);
-        updateCoins(100, 'task', '7-Day Login Streak completion');
-        toast({
-          title: "🎉 Login Streak Completed!",
-          description: "You earned 100 points for your 7-day login streak!",
-        });
-      }
-      
-      // Update the login streak task in the tasks array
+      // Check if quiz was completed today
+      const { data: quizSession } = await supabase
+        .from('quiz_sessions')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      const today = new Date().toISOString().split('T')[0];
+      const quizCompletedToday = quizSession?.last_quiz_date === today;
+      setQuizCompleted(quizCompletedToday);
+
+      // Calculate weekly progress (login streak + quiz completion for this week)
+      const weekStart = new Date();
+      weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+      weekStart.setHours(0, 0, 0, 0);
+
+      // For now, simple calculation: if login streak >= 1 and quiz completed, count as 1 day
+      let weeklyDays = 0;
+      if (streakProgress >= 1) weeklyDays++;
+      if (quizCompletedToday) weeklyDays++;
+      setWeeklyProgress(Math.min(weeklyDays, 7));
+
+      // Update tasks array with real progress
       setTasks(prevTasks => 
         prevTasks.map(task => {
-          if (task.id === 4) {
-            return {
-              ...task,
-              progress: progress,
-              completed: isCompleted
-            };
+          switch (task.id) {
+            case 2: // Quiz task
+              return {
+                ...task,
+                progress: quizCompletedToday ? 1 : 0,
+                completed: quizCompletedToday
+              };
+            case 4: // Login streak
+              return {
+                ...task,
+                progress: streakProgress,
+                completed: streakProgress >= 7
+              };
+            case 5: // Weekly bonus
+              return {
+                ...task,
+                progress: weeklyDays,
+                completed: weeklyDays >= 7
+              };
+            default:
+              return task;
           }
-          return task;
         })
       );
     } catch (error) {
-      console.error('Error in fetchLoginStreakProgress:', error);
+      console.error('Error fetching task progress:', error);
     }
   };
 
   const completeTask = async (taskId: number) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    if (taskId === 2) {
+      // Navigate to quiz for quiz task
+      if (onNavigateToQuiz) {
+        onNavigateToQuiz();
+      }
+      return;
+    }
+
+    // Handle other tasks
     setTasks(prevTasks => 
-      prevTasks.map(task => {
-        if (task.id === taskId && !task.completed && task.id !== 4) {
-          const newProgress = Math.min(task.progress + 1, task.total);
-          const isCompleted = newProgress >= task.total;
+      prevTasks.map(t => {
+        if (t.id === taskId && !t.completed && t.id !== 4 && t.id !== 5) {
+          const newProgress = Math.min(t.progress + 1, t.total);
+          const isCompleted = newProgress >= t.total;
           
           if (isCompleted) {
-            updateCoins(task.reward, 'task', `Task completion: ${task.title}`);
+            updateCoins(t.reward, 'task', `Task completion: ${t.title}`);
             toast({
               title: "🎉 Task Completed!",
-              description: `You earned ${task.reward} points!`,
+              description: `You earned ${t.reward} points!`,
             });
           }
           
           return {
-            ...task,
+            ...t,
             progress: newProgress,
             completed: isCompleted,
+          };
+        }
+        return t;
+      })
+    );
+  };
+
+  // Function to be called when quiz is completed
+  const onQuizCompleted = (score: number, points: number) => {
+    setQuizCompleted(true);
+    
+    // Update quiz task
+    setTasks(prevTasks => 
+      prevTasks.map(task => {
+        if (task.id === 2) {
+          return {
+            ...task,
+            progress: 1,
+            completed: true
           };
         }
         return task;
       })
     );
+
+    // Check if weekly bonus should be awarded
+    checkWeeklyBonus();
+  };
+
+  const checkWeeklyBonus = async () => {
+    const weeklyTask = tasks.find(t => t.id === 5);
+    if (weeklyTask && weeklyProgress >= 6 && !weeklyTask.completed) {
+      // Award weekly bonus
+      await updateCoins(200, 'task', 'Weekly bonus - completed all daily tasks');
+      toast({
+        title: "🎉 Weekly Bonus!",
+        description: "You earned 200 points for completing all daily tasks this week!",
+      });
+      
+      setTasks(prevTasks => 
+        prevTasks.map(task => {
+          if (task.id === 5) {
+            return {
+              ...task,
+              progress: 7,
+              completed: true
+            };
+          }
+          return task;
+        })
+      );
+    }
   };
 
   const getTaskTypeColor = (type: string) => {
@@ -167,6 +251,14 @@ const TasksList: React.FC = () => {
       case 'referral': return 'bg-gradient-to-r from-green-500 to-emerald-500 text-white';
       default: return 'bg-gradient-to-r from-gray-400 to-gray-600 text-white';
     }
+  };
+
+  const getTaskStatusText = (task: any) => {
+    if (task.completed) return 'Completed';
+    if (task.id === 2 && !quizCompleted) return 'Start Quiz';
+    if (task.id === 4) return 'Auto-tracked';
+    if (task.id === 5) return 'Auto-tracked';
+    return task.progress > 0 ? 'Continue' : 'Start Task';
   };
 
   return (
@@ -185,7 +277,7 @@ const TasksList: React.FC = () => {
             Daily Tasks & Bonuses
             <Star className="w-6 h-6 text-yellow-300 animate-pulse" />
           </CardTitle>
-          <p className="text-white/90 text-lg">Complete tasks to earn 30-50 points daily</p>
+          <p className="text-white/90 text-lg">Complete tasks to earn up to 370 points daily</p>
         </CardHeader>
         
         <CardContent className="relative z-10">
@@ -276,7 +368,7 @@ const TasksList: React.FC = () => {
                           <CheckCircle className="w-4 h-4 mr-2" />
                           Completed
                         </Badge>
-                      ) : task.id === 4 ? (
+                      ) : (task.id === 4 || task.id === 5) ? (
                         <Badge variant="outline" className="border-2 border-orange-300 text-orange-700 bg-orange-50 px-4 py-2 font-semibold">
                           <Calendar className="w-4 h-4 mr-2" />
                           Auto-tracked
@@ -284,11 +376,11 @@ const TasksList: React.FC = () => {
                       ) : (
                         <Button
                           onClick={() => completeTask(task.id)}
-                          disabled={task.progress >= task.total}
+                          disabled={task.completed || (task.id === 2 && quizCompleted)}
                           className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold px-6 py-2 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200"
                         >
-                          <Play className="w-4 h-4 mr-2" />
-                          {task.progress > 0 ? 'Continue' : 'Start Task'}
+                          {task.id === 2 ? <BookOpen className="w-4 h-4 mr-2" /> : <Play className="w-4 h-4 mr-2" />}
+                          {getTaskStatusText(task)}
                         </Button>
                       )}
                       

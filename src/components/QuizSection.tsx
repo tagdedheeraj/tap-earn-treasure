@@ -8,6 +8,8 @@ import { BookOpen, Clock, CheckCircle, XCircle, Trophy } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useUserData } from '@/hooks/useUserData';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 interface TriviaQuestion {
   category: string;
@@ -27,6 +29,7 @@ interface QuizQuestion {
 const QuizSection: React.FC = () => {
   const { wallet, updateCoins } = useUserData();
   const { notifyQuizCompleted } = useNotifications();
+  const { user } = useAuth();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [score, setScore] = useState(0);
@@ -36,6 +39,13 @@ const QuizSection: React.FC = () => {
   const [isAnswered, setIsAnswered] = useState(false);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [loading, setLoading] = useState(false);
+  const [quizCompletedToday, setQuizCompletedToday] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      checkQuizStatus();
+    }
+  }, [user]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -46,6 +56,24 @@ const QuizSection: React.FC = () => {
     }
     return () => clearTimeout(timer);
   }, [quizStarted, timeLeft, showResult, isAnswered]);
+
+  const checkQuizStatus = async () => {
+    if (!user) return;
+
+    try {
+      const { data: quizSession } = await supabase
+        .from('quiz_sessions')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      const today = new Date().toISOString().split('T')[0];
+      const completedToday = quizSession?.last_quiz_date === today;
+      setQuizCompletedToday(completedToday);
+    } catch (error) {
+      console.error('Error checking quiz status:', error);
+    }
+  };
 
   const fetchQuestions = async () => {
     setLoading(true);
@@ -89,6 +117,15 @@ const QuizSection: React.FC = () => {
   };
 
   const startQuiz = async () => {
+    if (quizCompletedToday) {
+      toast({
+        title: "Quiz Already Completed",
+        description: "You have already completed the quiz today. Come back tomorrow!",
+        variant: "destructive",
+      });
+      return;
+    }
+
     await fetchQuestions();
     setQuizStarted(true);
     setCurrentQuestion(0);
@@ -131,21 +168,62 @@ const QuizSection: React.FC = () => {
     const scorePercentage = Math.round((score / questions.length) * 100);
     
     try {
+      // Update coins
       await updateCoins(coinsEarned, 'quiz', `Daily quiz completed: ${score}/${questions.length} correct`);
+      
+      // Update quiz session in database
+      const today = new Date().toISOString().split('T')[0];
+      await supabase
+        .from('quiz_sessions')
+        .upsert({
+          user_id: user?.id,
+          last_quiz_date: today,
+          questions_answered: questions.length,
+          correct_answers: score,
+          coins_earned: coinsEarned,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id'
+        });
+
+      setQuizCompletedToday(true);
       notifyQuizCompleted(scorePercentage, coinsEarned);
+      
       toast({
-        title: "Quiz Completed! 🎉",
+        title: "🎉 Quiz Completed!",
         description: `You scored ${score}/${questions.length} and earned ${coinsEarned} points!`,
       });
     } catch (error) {
-      console.error('Error updating coins:', error);
+      console.error('Error updating quiz progress:', error);
       toast({
         title: "Quiz Completed!",
-        description: `You scored ${score}/${questions.length}. There was an issue saving your points.`,
+        description: `You scored ${score}/${questions.length}. There was an issue saving your progress.`,
         variant: "destructive",
       });
     }
   };
+
+  if (quizCompletedToday && !quizStarted) {
+    return (
+      <div className="space-y-6">
+        <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+          <CardHeader className="text-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full mx-auto flex items-center justify-center text-white">
+              <CheckCircle className="w-8 h-8" />
+            </div>
+            <CardTitle className="text-2xl">Quiz Completed Today!</CardTitle>
+            <p className="text-gray-600">You've already completed today's quiz. Come back tomorrow for new questions!</p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-green-100 p-4 rounded-lg border border-green-200 text-center">
+              <p className="text-green-800 font-semibold">✅ Daily Quiz Task Completed</p>
+              <p className="text-sm text-green-600 mt-1">Quiz resets every 24 hours</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (!quizStarted) {
     return (
@@ -177,12 +255,13 @@ const QuizSection: React.FC = () => {
                 <li>• 30 seconds per question</li>
                 <li>• Questions from Open Trivia Database</li>
                 <li>• Easy difficulty level</li>
+                <li>• One quiz per day</li>
               </ul>
             </div>
             
             <Button 
               onClick={startQuiz}
-              disabled={loading}
+              disabled={loading || quizCompletedToday}
               className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-lg py-3"
             >
               <BookOpen className="w-5 h-5 mr-2" />
@@ -224,7 +303,10 @@ const QuizSection: React.FC = () => {
           </div>
           
           <Button 
-            onClick={() => setQuizStarted(false)}
+            onClick={() => {
+              setQuizStarted(false);
+              setShowResult(false);
+            }}
             className="w-full"
             variant="outline"
           >
