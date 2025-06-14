@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Coins, Play, Trophy, Gift, Users, BookOpen, LogOut, TrendingUp, Calendar } from 'lucide-react';
+import { Coins, Play, Trophy, Gift, Users, BookOpen, LogOut, TrendingUp, Calendar, Star, Sparkles } from 'lucide-react';
 import MiningDashboard from '@/components/MiningDashboard';
 import QuickActions from '@/components/QuickActions';
 import CoinWallet from '@/components/CoinWallet';
@@ -26,19 +25,22 @@ const Index = () => {
   const [loginStreak] = useState(3);
 
   const tabConfig = [
-    { id: 'home', label: 'Home', icon: Play },
-    { id: 'tasks', label: 'Tasks', icon: Trophy },
-    { id: 'quiz', label: 'Quiz', icon: BookOpen },
-    { id: 'rewards', label: 'Rewards', icon: Gift },
-    { id: 'profile', label: 'Profile', icon: Users },
+    { id: 'home', label: 'Home', icon: Play, gradient: 'from-blue-500 to-purple-500' },
+    { id: 'tasks', label: 'Tasks', icon: Trophy, gradient: 'from-orange-500 to-red-500' },
+    { id: 'quiz', label: 'Quiz', icon: BookOpen, gradient: 'from-green-500 to-emerald-500' },
+    { id: 'rewards', label: 'Rewards', icon: Gift, gradient: 'from-pink-500 to-rose-500' },
+    { id: 'profile', label: 'Profile', icon: Users, gradient: 'from-indigo-500 to-purple-500' },
   ];
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your profile...</p>
+          <div className="relative">
+            <div className="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-6"></div>
+            <Sparkles className="w-6 h-6 text-purple-500 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+          </div>
+          <p className="text-gray-700 text-lg font-medium">Loading your profile...</p>
         </div>
       </div>
     );
@@ -72,28 +74,28 @@ const Index = () => {
 
             {/* Enhanced Stats Cards */}
             <div className="grid grid-cols-2 gap-4">
-              <Card className="bg-gradient-to-br from-green-50 to-emerald-100 border-green-200">
-                <CardContent className="p-4 text-center">
-                  <div className="w-12 h-12 bg-green-500 rounded-full mx-auto mb-3 flex items-center justify-center">
-                    <Users className="w-6 h-6 text-white" />
+              <Card className="bg-gradient-to-br from-green-50 to-emerald-100 border-green-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                <CardContent className="p-6 text-center">
+                  <div className="w-14 h-14 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
+                    <Users className="w-7 h-7 text-white" />
                   </div>
-                  <div className="text-2xl font-bold text-green-700">12</div>
-                  <div className="text-sm text-green-600">Referrals</div>
+                  <div className="text-3xl font-bold text-green-700 mb-1">12</div>
+                  <div className="text-green-600 font-medium">Referrals</div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-blue-50 to-cyan-100 border-blue-200">
-                <CardContent className="p-4 text-center">
-                  <div className="w-12 h-12 bg-blue-500 rounded-full mx-auto mb-3 flex items-center justify-center">
-                    <Trophy className="w-6 h-6 text-white" />
+              <Card className="bg-gradient-to-br from-blue-50 to-cyan-100 border-blue-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                <CardContent className="p-6 text-center">
+                  <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
+                    <Trophy className="w-7 h-7 text-white" />
                   </div>
-                  <div className="text-2xl font-bold text-blue-700">8</div>
-                  <div className="text-sm text-blue-600">Tasks Done</div>
+                  <div className="text-3xl font-bold text-blue-700 mb-1">8</div>
+                  <div className="text-blue-600 font-medium">Tasks Done</div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Enhanced Referral Program Card */}
+            {/* Keep existing referral program card and sign out card */}
             <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 shadow-lg">
               <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-t-lg">
                 <CardTitle className="text-xl flex items-center gap-2">
@@ -196,32 +198,45 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 sticky top-0 z-10">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-xl font-bold">GiftLeap</h1>
-            <p className="text-purple-100 text-sm">Earn. Leap. Redeem.</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <NotificationCenter />
-            <div className="flex items-center gap-2 bg-white/20 rounded-full px-3 py-1">
-              <Coins className="w-5 h-5 text-yellow-300" />
-              <span className="font-bold text-lg">{wallet?.total_coins || 0}</span>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-25 to-pink-50">
+      {/* Enhanced Header */}
+      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white sticky top-0 z-20 shadow-2xl">
+        <div className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-16 translate-x-16"></div>
+          
+          <div className="relative z-10 p-6">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                  <Star className="w-8 h-8 text-yellow-300" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold">GiftLeap</h1>
+                  <p className="text-purple-100 text-sm font-medium">Earn. Leap. Redeem.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <NotificationCenter />
+                <div className="flex items-center gap-3 bg-white/20 rounded-2xl px-4 py-2 backdrop-blur-sm border border-white/30">
+                  <Coins className="w-6 h-6 text-yellow-300" />
+                  <span className="font-bold text-xl">{wallet?.total_coins || 0}</span>
+                  <Sparkles className="w-4 h-4 text-yellow-300 animate-pulse" />
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="p-4 pb-20">
+      <div className="p-4 pb-24">
         {renderContent()}
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2">
-        <div className="flex justify-around">
+      {/* Enhanced Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200/50 px-2 py-3 shadow-2xl">
+        <div className="flex justify-around items-center max-w-md mx-auto">
           {tabConfig.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -229,14 +244,22 @@ const Index = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
+                className={`relative flex flex-col items-center py-2 px-3 rounded-2xl transition-all duration-300 transform ${
                   isActive
-                    ? 'text-purple-600 bg-purple-50'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? `bg-gradient-to-r ${tab.gradient} text-white shadow-lg scale-110 -translate-y-1`
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                <Icon className="w-6 h-6" />
-                <span className="text-xs mt-1">{tab.label}</span>
+                {isActive && (
+                  <div className="absolute inset-0 bg-white/20 rounded-2xl animate-pulse"></div>
+                )}
+                <Icon className={`w-6 h-6 relative z-10 ${isActive ? 'animate-bounce' : ''}`} />
+                <span className={`text-xs mt-1 font-medium relative z-10 ${isActive ? 'font-bold' : ''}`}>
+                  {tab.label}
+                </span>
+                {isActive && (
+                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-white rounded-full"></div>
+                )}
               </button>
             );
           })}
