@@ -1,0 +1,67 @@
+
+import { CheckCircle, Play, Users, Calendar, Gift } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
+import { Task } from '@/types/tasks';
+
+export const getInitialTasks = (): Task[] => [
+  {
+    id: 1,
+    title: 'Watch Video Ads',
+    description: 'Watch 3 rewarded video ads to earn points',
+    reward: 50,
+    progress: 0,
+    total: 3,
+    type: 'daily',
+    completed: false,
+    icon: Play,
+    color: 'from-green-400 to-green-600',
+  },
+  {
+    id: 2,
+    title: 'Complete Daily Quiz',
+    description: 'Answer quiz questions correctly to earn points',
+    reward: 20,
+    progress: 0,
+    total: 1,
+    type: 'daily',
+    completed: false,
+    icon: BookOpen,
+    color: 'from-blue-400 to-blue-600',
+  },
+  {
+    id: 3,
+    title: 'Invite Friends',
+    description: 'Invite friends who complete their first mining',
+    reward: 100,
+    progress: 0,
+    total: 1,
+    type: 'referral',
+    completed: false,
+    icon: Users,
+    color: 'from-purple-400 to-purple-600',
+  },
+  {
+    id: 4,
+    title: '7-Day Login Streak',
+    description: 'Login daily for 7 consecutive days',
+    reward: 100,
+    progress: 0,
+    total: 7,
+    type: 'streak',
+    completed: false,
+    icon: Calendar,
+    color: 'from-orange-400 to-orange-600',
+  },
+  {
+    id: 5,
+    title: 'Weekly Bonus',
+    description: 'Complete all daily tasks for a week',
+    reward: 200,
+    progress: 0,
+    total: 7,
+    type: 'weekly',
+    completed: false,
+    icon: Gift,
+    color: 'from-pink-400 to-pink-600',
+  },
+];
