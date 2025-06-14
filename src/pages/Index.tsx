@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Coins, Play, Trophy, Gift, Users, BookOpen, LogOut, TrendingUp, Calendar, Star, Sparkles, Award } from 'lucide-react';
+import { Coins, Play, Trophy, Gift, Users, BookOpen, LogOut, TrendingUp, Calendar, Star, Sparkles, Award, User } from 'lucide-react';
 import MiningDashboard from '@/components/MiningDashboard';
 import QuickActions from '@/components/QuickActions';
 import CoinWallet from '@/components/CoinWallet';
@@ -29,14 +28,14 @@ const Index = () => {
   const [userLevel] = useState(5);
   const [loginStreak] = useState(3);
 
-  // Reduced to 6 main tabs for bottom navigation
+  // Updated main tabs with Profile included
   const mainTabConfig = [
     { id: 'home', label: 'Home', icon: Play, gradient: 'from-blue-500 to-purple-500' },
     { id: 'daily', label: 'Daily', icon: Calendar, gradient: 'from-blue-500 to-cyan-500' },
     { id: 'tasks', label: 'Tasks', icon: Trophy, gradient: 'from-orange-500 to-red-500' },
     { id: 'spin', label: 'Spin', icon: Sparkles, gradient: 'from-purple-500 to-pink-500' },
     { id: 'rewards', label: 'Rewards', icon: Gift, gradient: 'from-pink-500 to-rose-500' },
-    { id: 'profile', label: 'Profile', icon: Users, gradient: 'from-gray-500 to-slate-500' },
+    { id: 'profile', label: 'Profile', icon: User, gradient: 'from-gray-500 to-slate-500' },
   ];
 
   // Additional features for home screen sections
@@ -320,23 +319,23 @@ const Index = () => {
           <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-16 translate-x-16"></div>
           
-          <div className="relative z-10 p-6">
+          <div className="relative z-10 p-4 md:p-6">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
-                  <Star className="w-8 h-8 text-yellow-300" />
+                  <Star className="w-6 h-6 md:w-8 md:h-8 text-yellow-300" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold">GiftLeap</h1>
-                  <p className="text-purple-100 text-sm font-medium">Earn. Leap. Redeem.</p>
+                  <h1 className="text-xl md:text-2xl font-bold">GiftLeap</h1>
+                  <p className="text-purple-100 text-xs md:text-sm font-medium">Earn. Leap. Redeem.</p>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 md:gap-4">
                 <NotificationCenter />
-                <div className="flex items-center gap-3 bg-white/20 rounded-2xl px-4 py-2 backdrop-blur-sm border border-white/30">
-                  <Coins className="w-6 h-6 text-yellow-300" />
-                  <span className="font-bold text-xl">{wallet?.total_coins || 0}</span>
-                  <Sparkles className="w-4 h-4 text-yellow-300 animate-pulse" />
+                <div className="flex items-center gap-2 md:gap-3 bg-white/20 rounded-xl md:rounded-2xl px-2 md:px-4 py-1 md:py-2 backdrop-blur-sm border border-white/30">
+                  <Coins className="w-4 h-4 md:w-6 md:h-6 text-yellow-300" />
+                  <span className="font-bold text-sm md:text-xl">{wallet?.total_coins || 0}</span>
+                  <Sparkles className="w-3 h-3 md:w-4 md:h-4 text-yellow-300 animate-pulse" />
                 </div>
               </div>
             </div>
@@ -349,9 +348,9 @@ const Index = () => {
         {renderContent()}
       </div>
 
-      {/* Simplified Bottom Navigation - Only 6 tabs */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200/50 px-2 py-2 shadow-2xl">
-        <div className="flex justify-around">
+      {/* Enhanced Mobile-First Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200/50 px-1 py-2 shadow-2xl">
+        <div className="flex justify-around items-center max-w-md mx-auto">
           {mainTabConfig.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -359,14 +358,14 @@ const Index = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`relative flex flex-col items-center py-2 px-3 rounded-2xl transition-all duration-300 transform min-w-[70px] ${
+                className={`relative flex flex-col items-center py-2 px-2 rounded-xl transition-all duration-300 transform min-w-[60px] ${
                   isActive
                     ? `bg-gradient-to-r ${tab.gradient} text-white shadow-lg scale-110 -translate-y-1`
                     : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 {isActive && (
-                  <div className="absolute inset-0 bg-white/20 rounded-2xl animate-pulse"></div>
+                  <div className="absolute inset-0 bg-white/20 rounded-xl animate-pulse"></div>
                 )}
                 <Icon className={`w-5 h-5 relative z-10 ${isActive ? 'animate-bounce' : ''}`} />
                 <span className={`text-xs mt-1 font-medium relative z-10 ${isActive ? 'font-bold' : ''}`}>

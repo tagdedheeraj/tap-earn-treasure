@@ -171,104 +171,119 @@ const NotificationCenter = () => {
         variant="ghost"
         size="sm"
         onClick={() => setIsOpen(!isOpen)}
-        className="relative"
+        className="relative p-2"
       >
         {unreadCount > 0 ? (
-          <BellRing className="w-5 h-5" />
+          <BellRing className="w-6 h-6" />
         ) : (
-          <Bell className="w-5 h-5" />
+          <Bell className="w-6 h-6" />
         )}
         {unreadCount > 0 && (
           <Badge 
             variant="destructive" 
-            className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
+            className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs animate-pulse"
           >
             {unreadCount > 9 ? '9+' : unreadCount}
           </Badge>
         )}
       </Button>
 
+      {/* Mobile-optimized notification panel */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-80 z-50">
-          <Card className="shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-lg">Notifications</CardTitle>
-              <div className="flex items-center gap-2">
-                {unreadCount > 0 && (
+        <>
+          {/* Mobile overlay */}
+          <div 
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
+            onClick={() => setIsOpen(false)}
+          />
+          
+          {/* Notification panel */}
+          <div className="fixed md:absolute top-0 right-0 md:top-full md:mt-2 w-full md:w-96 h-full md:h-auto z-50 md:max-h-[500px]">
+            <Card className="h-full md:h-auto shadow-2xl md:shadow-lg border-0 md:border rounded-none md:rounded-lg bg-white">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-none md:rounded-t-lg">
+                <CardTitle className="text-lg font-bold">Notifications</CardTitle>
+                <div className="flex items-center gap-2">
+                  {unreadCount > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={markAllAsRead}
+                      className="text-xs text-white hover:bg-white/20"
+                    >
+                      Mark all read
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={markAllAsRead}
-                    className="text-xs"
+                    onClick={() => setIsOpen(false)}
+                    className="text-white hover:bg-white/20 p-1"
                   >
-                    Mark all read
+                    <X className="w-5 h-5" />
                   </Button>
-                )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="max-h-96 overflow-y-auto">
-                {loading ? (
-                  <div className="p-4 text-center text-gray-500">
-                    Loading notifications...
-                  </div>
-                ) : notifications.length > 0 ? (
-                  <div className="space-y-1">
-                    {notifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        className={`p-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50 ${
-                          !notification.is_read ? 'bg-blue-50' : ''
-                        }`}
-                        onClick={() => markAsRead(notification.id)}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className={`p-2 rounded-full ${
-                            notification.type === 'mining' ? 'bg-yellow-100 text-yellow-600' :
-                            notification.type === 'task' ? 'bg-green-100 text-green-600' :
-                            notification.type === 'quiz' ? 'bg-blue-100 text-blue-600' :
-                            notification.type === 'referral' ? 'bg-purple-100 text-purple-600' :
-                            notification.type === 'reward' ? 'bg-orange-100 text-orange-600' :
-                            'bg-gray-100 text-gray-600'
-                          }`}>
-                            {getNotificationIcon(notification.type)}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                              <p className="font-medium text-sm text-gray-900 truncate">
-                                {notification.title}
-                              </p>
-                              {!notification.is_read && (
-                                <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 ml-2"></div>
-                              )}
+                </div>
+              </CardHeader>
+              
+              <CardContent className="p-0 h-full md:h-auto">
+                <div className="h-full md:max-h-96 overflow-y-auto">
+                  {loading ? (
+                    <div className="p-8 text-center text-gray-500">
+                      <div className="animate-spin w-8 h-8 border-2 border-purple-200 border-t-purple-600 rounded-full mx-auto mb-4"></div>
+                      <p>Loading notifications...</p>
+                    </div>
+                  ) : notifications.length > 0 ? (
+                    <div className="space-y-0">
+                      {notifications.map((notification) => (
+                        <div
+                          key={notification.id}
+                          className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors active:bg-gray-100 ${
+                            !notification.is_read ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+                          }`}
+                          onClick={() => markAsRead(notification.id)}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className={`p-2 rounded-full flex-shrink-0 ${
+                              notification.type === 'mining' ? 'bg-yellow-100 text-yellow-600' :
+                              notification.type === 'task' ? 'bg-green-100 text-green-600' :
+                              notification.type === 'quiz' ? 'bg-blue-100 text-blue-600' :
+                              notification.type === 'referral' ? 'bg-purple-100 text-purple-600' :
+                              notification.type === 'reward' ? 'bg-orange-100 text-orange-600' :
+                              'bg-gray-100 text-gray-600'
+                            }`}>
+                              {getNotificationIcon(notification.type)}
                             </div>
-                            <p className="text-sm text-gray-600 line-clamp-2">
-                              {notification.message}
-                            </p>
-                            <p className="text-xs text-gray-400 mt-1">
-                              {formatTime(notification.created_at)}
-                            </p>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between mb-1">
+                                <p className="font-semibold text-gray-900 text-sm leading-tight">
+                                  {notification.title}
+                                </p>
+                                {!notification.is_read && (
+                                  <div className="w-3 h-3 bg-blue-500 rounded-full flex-shrink-0 ml-2 animate-pulse"></div>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-600 leading-relaxed mb-2">
+                                {notification.message}
+                              </p>
+                              <p className="text-xs text-gray-400 font-medium">
+                                {formatTime(notification.created_at)}
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="p-4 text-center text-gray-500">
-                    No notifications yet
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-12 text-center text-gray-500">
+                      <Bell className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                      <p className="text-lg font-medium mb-2">No notifications yet</p>
+                      <p className="text-sm">You'll see your notifications here when you get them</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </>
       )}
     </div>
   );
