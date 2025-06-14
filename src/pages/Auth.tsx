@@ -34,28 +34,33 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      console.log('Starting signup process for:', signUpEmail);
       
       const { data, error } = await supabase.auth.signUp({
         email: signUpEmail,
         password: signUpPassword,
-        options: {
-          emailRedirectTo: redirectUrl
-        }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Signup error:', error);
+        throw error;
+      }
+
+      console.log('Signup successful:', data);
 
       if (data.user) {
         // Process referral if code provided
         if (referralCode.trim()) {
           try {
+            console.log('Processing referral code:', referralCode.trim());
             const { error: referralError } = await supabase.rpc('process_referral_bonus', {
               referrer_code: referralCode.trim(),
               new_user_id: data.user.id
             });
             if (referralError) {
               console.error('Referral processing error:', referralError);
+            } else {
+              console.log('Referral bonus processed successfully');
             }
           } catch (err) {
             console.error('Error processing referral:', err);
@@ -63,14 +68,25 @@ const Auth = () => {
         }
 
         toast({
-          title: "Account created successfully!",
-          description: "Please check your email to verify your account.",
+          title: "Account created successfully! 🎉",
+          description: "Welcome to CoinMiner Pro! You can now start earning coins.",
         });
+
+        // Clear form
+        setSignUpEmail('');
+        setSignUpPassword('');
+        setReferralCode('');
+        
+        // Redirect to main page
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1000);
       }
     } catch (error: any) {
+      console.error('Signup process error:', error);
       toast({
-        title: "Error",
-        description: error.message,
+        title: "Account creation failed",
+        description: error.message || "Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -83,20 +99,33 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      console.log('Starting signin process for:', signInEmail);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email: signInEmail,
         password: signInPassword,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Signin error:', error);
+        throw error;
+      }
+
+      console.log('Signin successful:', data);
 
       if (data.user) {
+        toast({
+          title: "Welcome back! 🎉",
+          description: "Successfully signed in to CoinMiner Pro.",
+        });
+        
         window.location.href = '/';
       }
     } catch (error: any) {
+      console.error('Signin process error:', error);
       toast({
-        title: "Error",
-        description: error.message,
+        title: "Sign in failed",
+        description: error.message || "Please check your credentials and try again.",
         variant: "destructive",
       });
     } finally {
@@ -192,10 +221,11 @@ const Auth = () => {
                       <Input
                         id="signup-password"
                         type="password"
-                        placeholder="Create a password"
+                        placeholder="Create a password (min 6 characters)"
                         value={signUpPassword}
                         onChange={(e) => setSignUpPassword(e.target.value)}
                         className="pl-10"
+                        minLength={6}
                         required
                       />
                     </div>
