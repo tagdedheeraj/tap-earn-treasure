@@ -112,7 +112,7 @@ const SpinWheel = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 p-4 pb-32 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 p-4 pb-40 relative overflow-hidden">
       <SpinWheelBackground />
 
       <div className="max-w-md mx-auto space-y-6 relative z-10">
