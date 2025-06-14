@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,12 +25,20 @@ const NotificationCenter = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const channelRef = useRef<any>(null);
 
   useEffect(() => {
     if (user) {
       fetchNotifications();
       subscribeToNotifications();
     }
+
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+    };
   }, [user]);
 
   const fetchNotifications = async () => {
@@ -39,16 +47,20 @@ const NotificationCenter = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('notifications')
+        .from('notifications' as any)
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(20);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching notifications:', error);
+        return;
+      }
       
-      setNotifications(data || []);
-      setUnreadCount(data?.filter(n => !n.is_read).length || 0);
+      const typedData = data as Notification[];
+      setNotifications(typedData || []);
+      setUnreadCount(typedData?.filter(n => !n.is_read).length || 0);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {
@@ -57,9 +69,9 @@ const NotificationCenter = () => {
   };
 
   const subscribeToNotifications = () => {
-    if (!user) return;
+    if (!user || channelRef.current) return;
 
-    const channel = supabase
+    channelRef.current = supabase
       .channel('notifications_changes')
       .on(
         'postgres_changes',
@@ -82,20 +94,19 @@ const NotificationCenter = () => {
         }
       )
       .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   };
 
   const markAsRead = async (notificationId: string) => {
     try {
       const { error } = await supabase
-        .from('notifications')
+        .from('notifications' as any)
         .update({ is_read: true })
         .eq('id', notificationId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error marking notification as read:', error);
+        return;
+      }
 
       setNotifications(prev => 
         prev.map(n => 
@@ -113,12 +124,15 @@ const NotificationCenter = () => {
 
     try {
       const { error } = await supabase
-        .from('notifications')
+        .from('notifications' as any)
         .update({ is_read: true })
         .eq('user_id', user.id)
         .eq('is_read', false);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error marking all notifications as read:', error);
+        return;
+      }
 
       setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
       setUnreadCount(0);

@@ -15,7 +15,7 @@ export const useNotifications = () => {
 
     try {
       const { error } = await supabase
-        .from('notifications')
+        .from('notifications' as any)
         .insert({
           user_id: user.id,
           type,
@@ -25,7 +25,9 @@ export const useNotifications = () => {
           is_read: false
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating notification:', error);
+      }
     } catch (error) {
       console.error('Error creating notification:', error);
     }
