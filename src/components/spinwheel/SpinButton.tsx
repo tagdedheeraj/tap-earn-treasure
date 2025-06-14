@@ -41,7 +41,7 @@ const SpinButton: React.FC<SpinButtonProps> = ({
       ) : (
         <div className="space-y-4">
           <Button disabled className="bg-gray-500 text-gray-300 px-8 md:px-16 py-4 md:py-6 text-lg md:text-2xl font-bold rounded-2xl md:rounded-3xl border-4 border-gray-400 opacity-60">
-            Already Spun Today
+            Already Spin Today
           </Button>
           <p className="text-white/80 font-medium text-base md:text-lg">
             Next spin in: <Badge variant="outline" className="font-bold text-yellow-400 bg-yellow-400/10 border-yellow-400/30 text-sm md:text-lg px-2 md:px-3 py-1">{getTimeUntilNextSpin()}</Badge>

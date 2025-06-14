@@ -157,20 +157,20 @@ const SpinWheel = () => {
           getRarityBorderColor={getRarityBorderColor}
         />
 
-        {/* Quick Stats */}
+        {/* Quick Stats with updated background colors */}
         <Card className="bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl border-white/30 shadow-xl">
           <CardContent className="p-4">
             <div className="grid grid-cols-3 gap-4 text-center">
-              <div className="bg-gradient-to-br from-yellow-400/20 to-orange-400/20 rounded-xl p-3 backdrop-blur-sm border border-yellow-400/30">
-                <div className="text-2xl font-black text-yellow-300 mb-1">1</div>
+              <div className="bg-gradient-to-br from-blue-500/30 to-cyan-500/30 rounded-xl p-3 backdrop-blur-sm border border-blue-400/40">
+                <div className="text-2xl font-black text-blue-200 mb-1">1</div>
                 <div className="text-xs text-white/80 font-medium">Daily Spin</div>
               </div>
-              <div className="bg-gradient-to-br from-green-400/20 to-emerald-400/20 rounded-xl p-3 backdrop-blur-sm border border-green-400/30">
-                <div className="text-2xl font-black text-green-300 mb-1">50</div>
+              <div className="bg-gradient-to-br from-emerald-500/30 to-teal-500/30 rounded-xl p-3 backdrop-blur-sm border border-emerald-400/40">
+                <div className="text-2xl font-black text-emerald-200 mb-1">50</div>
                 <div className="text-xs text-white/80 font-medium">Max Reward</div>
               </div>
-              <div className="bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-xl p-3 backdrop-blur-sm border border-purple-400/30">
-                <div className="text-2xl font-black text-purple-300 mb-1">FREE</div>
+              <div className="bg-gradient-to-br from-rose-500/30 to-pink-500/30 rounded-xl p-3 backdrop-blur-sm border border-rose-400/40">
+                <div className="text-2xl font-black text-rose-200 mb-1">FREE</div>
                 <div className="text-xs text-white/80 font-medium">Every Day</div>
               </div>
             </div>
