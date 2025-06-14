@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,14 +7,26 @@ import { Progress } from '@/components/ui/progress';
 import { BookOpen, Clock, CheckCircle, XCircle, Trophy } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useUserData } from '@/hooks/useUserData';
+import { useNotifications } from '@/hooks/useNotifications';
 
-interface QuizSectionProps {
-  totalCoins: number;
-  setTotalCoins: (coins: number) => void;
+interface TriviaQuestion {
+  category: string;
+  type: string;
+  difficulty: string;
+  question: string;
+  correct_answer: string;
+  incorrect_answers: string[];
+}
+
+interface QuizQuestion {
+  question: string;
+  options: string[];
+  correct: number;
 }
 
 const QuizSection: React.FC = () => {
   const { wallet, updateCoins } = useUserData();
+  const { notifyQuizCompleted } = useNotifications();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [score, setScore] = useState(0);
@@ -21,34 +34,8 @@ const QuizSection: React.FC = () => {
   const [quizStarted, setQuizStarted] = useState(false);
   const [timeLeft, setTimeLeft] = useState(30);
   const [isAnswered, setIsAnswered] = useState(false);
-
-  const questions = [
-    {
-      question: "What is the capital of France?",
-      options: ["London", "Berlin", "Paris", "Madrid"],
-      correct: 2,
-    },
-    {
-      question: "Which planet is known as the Red Planet?",
-      options: ["Venus", "Mars", "Jupiter", "Saturn"],
-      correct: 1,
-    },
-    {
-      question: "What is 2 + 2?",
-      options: ["3", "4", "5", "6"],
-      correct: 1,
-    },
-    {
-      question: "Who painted the Mona Lisa?",
-      options: ["Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci", "Michelangelo"],
-      correct: 2,
-    },
-    {
-      question: "What is the largest ocean on Earth?",
-      options: ["Atlantic", "Indian", "Arctic", "Pacific"],
-      correct: 3,
-    },
-  ];
+  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -60,7 +47,49 @@ const QuizSection: React.FC = () => {
     return () => clearTimeout(timer);
   }, [quizStarted, timeLeft, showResult, isAnswered]);
 
-  const startQuiz = () => {
+  const fetchQuestions = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('https://opentdb.com/api.php?amount=10&difficulty=easy');
+      const data = await response.json();
+      
+      if (data.response_code === 0) {
+        const formattedQuestions: QuizQuestion[] = data.results.map((item: TriviaQuestion) => {
+          const allAnswers = [...item.incorrect_answers, item.correct_answer];
+          // Shuffle answers
+          const shuffledAnswers = allAnswers.sort(() => Math.random() - 0.5);
+          const correctIndex = shuffledAnswers.indexOf(item.correct_answer);
+          
+          return {
+            question: decodeHtmlEntities(item.question),
+            options: shuffledAnswers.map(answer => decodeHtmlEntities(answer)),
+            correct: correctIndex
+          };
+        });
+        setQuestions(formattedQuestions);
+      } else {
+        throw new Error('Failed to fetch questions');
+      }
+    } catch (error) {
+      console.error('Error fetching questions:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load quiz questions. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const decodeHtmlEntities = (text: string) => {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = text;
+    return textarea.value;
+  };
+
+  const startQuiz = async () => {
+    await fetchQuestions();
     setQuizStarted(true);
     setCurrentQuestion(0);
     setScore(0);
@@ -99,9 +128,11 @@ const QuizSection: React.FC = () => {
   const finishQuiz = async () => {
     setShowResult(true);
     const coinsEarned = score * 5; // 5 points per correct answer
+    const scorePercentage = Math.round((score / questions.length) * 100);
     
     try {
       await updateCoins(coinsEarned, 'quiz', `Daily quiz completed: ${score}/${questions.length} correct`);
+      notifyQuizCompleted(scorePercentage, coinsEarned);
       toast({
         title: "Quiz Completed! 🎉",
         description: `You scored ${score}/${questions.length} and earned ${coinsEarned} points!`,
@@ -130,11 +161,11 @@ const QuizSection: React.FC = () => {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4 text-center">
               <div className="bg-white p-4 rounded-lg border">
-                <p className="text-2xl font-bold text-blue-600">5</p>
+                <p className="text-2xl font-bold text-blue-600">10</p>
                 <p className="text-sm text-gray-600">Questions</p>
               </div>
               <div className="bg-white p-4 rounded-lg border">
-                <p className="text-2xl font-bold text-green-600">25</p>
+                <p className="text-2xl font-bold text-green-600">50</p>
                 <p className="text-sm text-gray-600">Max Points</p>
               </div>
             </div>
@@ -144,17 +175,18 @@ const QuizSection: React.FC = () => {
               <ul className="text-sm text-yellow-700 space-y-1">
                 <li>• 5 points per correct answer</li>
                 <li>• 30 seconds per question</li>
-                <li>• One quiz per day</li>
-                <li>• No skipping questions</li>
+                <li>• Questions from Open Trivia Database</li>
+                <li>• Easy difficulty level</li>
               </ul>
             </div>
             
             <Button 
               onClick={startQuiz}
+              disabled={loading}
               className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-lg py-3"
             >
               <BookOpen className="w-5 h-5 mr-2" />
-              Start Quiz
+              {loading ? 'Loading Questions...' : 'Start Quiz'}
             </Button>
           </CardContent>
         </Card>
@@ -186,7 +218,7 @@ const QuizSection: React.FC = () => {
               <p className="text-sm text-gray-600">Accuracy</p>
             </div>
             <div className="bg-white p-4 rounded-lg text-center border">
-              <p className="text-xl font-bold text-blue-600">18h</p>
+              <p className="text-xl font-bold text-blue-600">24h</p>
               <p className="text-sm text-gray-600">Next Quiz</p>
             </div>
           </div>
@@ -198,6 +230,17 @@ const QuizSection: React.FC = () => {
           >
             Back to Quiz Menu
           </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (questions.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-center">
+          <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading quiz questions...</p>
         </CardContent>
       </Card>
     );
