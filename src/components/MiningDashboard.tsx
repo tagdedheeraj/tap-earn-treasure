@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -41,35 +42,11 @@ const MiningDashboard: React.FC = () => {
         if (data) {
           setMiningSession(data);
           
-          // Check if mining is in progress - handle both new and old data formats
-          const isMiningActive = (data as any).is_mining_active || false;
-          if (isMiningActive) {
-            setIsMining(true);
-            
-            // Calculate progress based on time elapsed
-            const miningStartedAt = (data as any).mining_started_at;
-            if (miningStartedAt) {
-              const startTime = new Date(miningStartedAt).getTime();
-              const now = Date.now();
-              const elapsedTime = now - startTime;
-              const totalMiningTime = 60000; // 1 minute for testing (would be longer in production)
-              const calculatedProgress = Math.min(Math.floor((elapsedTime / totalMiningTime) * 100), 100);
-              
-              setMiningProgress(calculatedProgress);
-              setMinedCoins(Math.min(calculatedProgress, 100));
-              
-              if (calculatedProgress >= 100) {
-                setIsMining(false);
-              }
-            }
-          }
-          
-          // Check if mining is on cooldown
-          const miningCompletedAt = (data as any).mining_completed_at;
-          if (miningCompletedAt) {
-            const completedTime = new Date(miningCompletedAt).getTime();
+          // Check if user can mine based on last mining time
+          if (data.last_mining_time) {
+            const lastMiningTime = new Date(data.last_mining_time).getTime();
             const now = Date.now();
-            const hoursSinceMining = (now - completedTime) / (1000 * 60 * 60);
+            const hoursSinceMining = (now - lastMiningTime) / (1000 * 60 * 60);
             
             if (hoursSinceMining < 24) {
               setCanMine(false);
@@ -142,23 +119,14 @@ const MiningDashboard: React.FC = () => {
       
       try {
         const now = new Date().toISOString();
-        const updateData: any = {
-          mining_progress: 0,
-          coins_mined: 0,
-          last_mining_time: now
-        };
-
-        // Add new columns safely
-        try {
-          updateData.is_mining_active = true;
-          updateData.mining_started_at = now;
-        } catch (e) {
-          // Columns don't exist yet
-        }
-
+        
         const { error } = await supabase
           .from('mining_sessions')
-          .update(updateData)
+          .update({
+            mining_progress: 0,
+            coins_mined: 0,
+            last_mining_time: now
+          })
           .eq('user_id', user.id);
         
         if (error) throw error;
@@ -166,6 +134,11 @@ const MiningDashboard: React.FC = () => {
         setIsMining(true);
         setMiningProgress(0);
         setMinedCoins(0);
+        
+        toast({
+          title: "Mining Started! ⛏️",
+          description: "Your mining session has begun. Wait for it to complete!",
+        });
       } catch (error) {
         console.error('Error starting mining:', error);
         toast({
@@ -185,23 +158,14 @@ const MiningDashboard: React.FC = () => {
       
       try {
         const now = new Date().toISOString();
-        const updateData: any = {
-          mining_progress: 100,
-          coins_mined: 100,
-          last_mining_time: now
-        };
-
-        // Add new columns safely
-        try {
-          updateData.is_mining_active = false;
-          updateData.mining_completed_at = now;
-        } catch (e) {
-          // Columns don't exist yet
-        }
-
+        
         const { error } = await supabase
           .from('mining_sessions')
-          .update(updateData)
+          .update({
+            mining_progress: 100,
+            coins_mined: 100,
+            last_mining_time: now
+          })
           .eq('user_id', user.id);
         
         if (error) throw error;
