@@ -1,15 +1,15 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Coins, Play, Trophy, Gift, Users, BookOpen, LogOut, Copy, Check, Crown, Star, TrendingUp, Calendar } from 'lucide-react';
+import { Coins, Play, Trophy, Gift, Users, BookOpen, LogOut, TrendingUp, Calendar } from 'lucide-react';
 import MiningDashboard from '@/components/MiningDashboard';
 import QuickActions from '@/components/QuickActions';
 import CoinWallet from '@/components/CoinWallet';
 import TasksList from '@/components/TasksList';
 import QuizSection from '@/components/QuizSection';
 import RewardsSection from '@/components/RewardsSection';
+import ProfileHeader from '@/components/ProfileHeader';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserData } from '@/hooks/useUserData';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
@@ -22,7 +22,6 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [userLevel] = useState(5);
   const [loginStreak] = useState(3);
-  const [copied, setCopied] = useState(false);
 
   const tabConfig = [
     { id: 'home', label: 'Home', icon: Play },
@@ -31,18 +30,6 @@ const Index = () => {
     { id: 'rewards', label: 'Rewards', icon: Gift },
     { id: 'profile', label: 'Profile', icon: Users },
   ];
-
-  const handleCopyReferralCode = () => {
-    if (profile?.referral_code) {
-      navigator.clipboard.writeText(profile.referral_code);
-      setCopied(true);
-      toast({
-        title: "Referral Code Copied! 📋",
-        description: "Share with friends to earn 100 coins per successful referral!",
-      });
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
 
   if (loading) {
     return (
@@ -74,74 +61,12 @@ const Index = () => {
       case 'profile':
         return (
           <div className="space-y-6">
-            {/* Enhanced Profile Header Card */}
-            <Card className="bg-gradient-to-br from-purple-600 via-purple-500 to-blue-600 border-0 text-white overflow-hidden relative">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12"></div>
-              
-              <CardHeader className="text-center relative z-10 pb-4">
-                <div className="relative mx-auto mb-4">
-                  <div className="w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full mx-auto flex items-center justify-center text-white text-3xl font-bold shadow-lg">
-                    {profile?.username?.[0]?.toUpperCase() || 'U'}
-                  </div>
-                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
-                    <Crown className="w-4 h-4 text-yellow-800" />
-                  </div>
-                </div>
-                
-                <CardTitle className="text-2xl font-bold text-white mb-2">
-                  {profile?.username || 'GiftLeap User'}
-                </CardTitle>
-                
-                <div className="flex justify-center gap-3 mb-4">
-                  <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30">
-                    <Star className="w-3 h-3 mr-1" />
-                    Level {userLevel}
-                  </Badge>
-                  <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30">
-                    <Calendar className="w-3 h-3 mr-1" />
-                    {loginStreak} Day Streak
-                  </Badge>
-                </div>
-              </CardHeader>
-              
-              <CardContent className="relative z-10 pt-0">
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="bg-white/15 backdrop-blur-sm rounded-lg p-4 text-center">
-                    <div className="flex items-center justify-center mb-2">
-                      <Coins className="w-5 h-5 text-yellow-300 mr-2" />
-                      <span className="text-sm text-white/80">Total Coins</span>
-                    </div>
-                    <div className="text-2xl font-bold text-white">{wallet?.total_coins || 0}</div>
-                  </div>
-                  
-                  <div className="bg-white/15 backdrop-blur-sm rounded-lg p-4 text-center">
-                    <div className="flex items-center justify-center mb-2">
-                      <TrendingUp className="w-5 h-5 text-green-300 mr-2" />
-                      <span className="text-sm text-white/80">Rank</span>
-                    </div>
-                    <div className="text-2xl font-bold text-white">#42</div>
-                  </div>
-                </div>
-
-                <div className="bg-white/15 backdrop-blur-sm rounded-lg p-4 mb-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-white/80 text-sm">Referral Code</span>
-                    <Badge variant="outline" className="font-mono text-white border-white/30 bg-white/10">
-                      {profile?.referral_code || 'Loading...'}
-                    </Badge>
-                  </div>
-                </div>
-
-                <Button 
-                  className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm"
-                  onClick={handleCopyReferralCode}
-                >
-                  {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-                  {copied ? 'Copied!' : 'Copy Referral Code'}
-                </Button>
-              </CardContent>
-            </Card>
+            <ProfileHeader 
+              profile={profile}
+              wallet={wallet}
+              userLevel={userLevel}
+              loginStreak={loginStreak}
+            />
 
             {/* Enhanced Stats Cards */}
             <div className="grid grid-cols-2 gap-4">
