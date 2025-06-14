@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -6,6 +6,8 @@ import { Progress } from '@/components/ui/progress';
 import { CheckCircle, Clock, Play, Trophy, Users, Calendar, Gift } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useUserData } from '@/hooks/useUserData';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 interface TasksListProps {
   totalCoins: number;
@@ -14,6 +16,8 @@ interface TasksListProps {
 
 const TasksList: React.FC = () => {
   const { wallet, updateCoins } = useUserData();
+  const { user } = useAuth();
+  const [loginStreakProgress, setLoginStreakProgress] = useState(0);
   const [tasks, setTasks] = useState([
     {
       id: 1,
@@ -56,7 +60,7 @@ const TasksList: React.FC = () => {
       title: '7-Day Login Streak',
       description: 'Login daily for 7 consecutive days',
       reward: 100,
-      progress: 3,
+      progress: 0,
       total: 7,
       type: 'streak',
       completed: false,
@@ -77,10 +81,70 @@ const TasksList: React.FC = () => {
     },
   ]);
 
+  useEffect(() => {
+    if (user) {
+      fetchLoginStreakProgress();
+    }
+  }, [user]);
+
+  const fetchLoginStreakProgress = async () => {
+    if (!user) return;
+
+    try {
+      const { data: loginStreakTask, error } = await supabase
+        .from('user_tasks')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('task_type', 'login_streak')
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching login streak:', error);
+        return;
+      }
+
+      const progress = loginStreakTask?.completed_count || 0;
+      const isCompleted = progress >= 7;
+      
+      setLoginStreakProgress(progress);
+      
+      // Update the login streak task in the tasks array
+      setTasks(prevTasks => 
+        prevTasks.map(task => {
+          if (task.id === 4) { // Login streak task
+            return {
+              ...task,
+              progress: progress,
+              completed: isCompleted
+            };
+          }
+          return task;
+        })
+      );
+
+      // If just completed (exactly 7), give reward
+      if (progress === 7 && loginStreakTask && !loginStreakTask.reward_claimed) {
+        updateCoins(100, 'task', '7-Day Login Streak completion');
+        toast({
+          title: "Login Streak Completed! 🎉",
+          description: "You earned 100 points for your 7-day login streak!",
+        });
+
+        // Mark reward as claimed
+        await supabase
+          .from('user_tasks')
+          .update({ reward_claimed: true })
+          .eq('id', loginStreakTask.id);
+      }
+    } catch (error) {
+      console.error('Error in fetchLoginStreakProgress:', error);
+    }
+  };
+
   const completeTask = async (taskId: number) => {
     setTasks(prevTasks => 
       prevTasks.map(task => {
-        if (task.id === taskId && !task.completed) {
+        if (task.id === taskId && !task.completed && task.id !== 4) { // Don't allow manual completion of login streak
           const newProgress = Math.min(task.progress + 1, task.total);
           const isCompleted = newProgress >= task.total;
           
@@ -188,6 +252,11 @@ const TasksList: React.FC = () => {
                         <Badge variant="default" className="bg-green-500">
                           <CheckCircle className="w-4 h-4 mr-1" />
                           Completed
+                        </Badge>
+                      ) : task.id === 4 ? (
+                        <Badge variant="outline" className="text-orange-600 border-orange-300">
+                          <Calendar className="w-4 h-4 mr-1" />
+                          Auto-tracked
                         </Badge>
                       ) : (
                         <Button
