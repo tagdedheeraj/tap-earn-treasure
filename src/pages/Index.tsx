@@ -2,14 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Coins, Play, Trophy, Gift, Users, BookOpen, LogOut, TrendingUp, Calendar, Star, Sparkles, Award, User } from 'lucide-react';
+import { Coins, Play, Trophy, Gift, Users, BookOpen, LogOut, TrendingUp, Calendar, Star, Award, User } from 'lucide-react';
 import MiningDashboard from '@/components/MiningDashboard';
 import QuickActions from '@/components/QuickActions';
 import CoinWallet from '@/components/CoinWallet';
 import TasksList from '@/components/TasksList';
 import QuizSection from '@/components/QuizSection';
 import RewardsSection from '@/components/RewardsSection';
-import SpinWheel from '@/components/SpinWheel';
 import AchievementSystem from '@/components/AchievementSystem';
 import DailyRewards from '@/components/DailyRewards';
 import Leaderboard from '@/components/Leaderboard';
@@ -28,12 +27,11 @@ const Index = () => {
   const [userLevel] = useState(5);
   const [loginStreak] = useState(3);
 
-  // Updated main tabs with Profile included
+  // Updated main tabs without Spin
   const mainTabConfig = [
     { id: 'home', label: 'Home', icon: Play, gradient: 'from-blue-500 to-purple-500' },
     { id: 'daily', label: 'Daily', icon: Calendar, gradient: 'from-blue-500 to-cyan-500' },
     { id: 'tasks', label: 'Tasks', icon: Trophy, gradient: 'from-orange-500 to-red-500' },
-    { id: 'spin', label: 'Spin', icon: Sparkles, gradient: 'from-purple-500 to-pink-500' },
     { id: 'rewards', label: 'Rewards', icon: Gift, gradient: 'from-pink-500 to-rose-500' },
     { id: 'profile', label: 'Profile', icon: User, gradient: 'from-gray-500 to-slate-500' },
   ];
@@ -66,14 +64,6 @@ const Index = () => {
     toast({
       title: "🎁 Rewards",
       description: "Check out available rewards and offers!",
-    });
-  };
-
-  const handleNavigateToSpinWheel = () => {
-    setActiveTab('spin');
-    toast({
-      title: "🎰 Spin Wheel",
-      description: "Try your luck with the daily spin wheel!",
     });
   };
 
@@ -120,12 +110,11 @@ const Index = () => {
               onNavigateToQuiz={handleNavigateToQuiz}
               onNavigateToTasks={handleNavigateToTasks}
               onNavigateToRewards={handleNavigateToRewards}
-              onNavigateToSpinWheel={handleNavigateToSpinWheel}
               onNavigateToDailyRewards={handleNavigateToDailyRewards}
             />
             <CoinWallet />
             
-            {/* New More Features Section */}
+            {/* More Features Section */}
             <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200 shadow-lg">
               <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
                 <CardTitle className="text-xl flex items-center gap-2">
@@ -152,7 +141,7 @@ const Index = () => {
                           <div className="text-sm text-gray-600">{feature.description}</div>
                         </div>
                         <div className="text-purple-500">
-                          <Sparkles className="w-5 h-5" />
+                          <Star className="w-5 h-5" />
                         </div>
                       </Button>
                     );
@@ -168,8 +157,6 @@ const Index = () => {
         return <TasksList onNavigateToQuiz={handleNavigateToQuiz} />;
       case 'quiz':
         return <QuizSection />;
-      case 'spin':
-        return <SpinWheel />;
       case 'leaderboard':
         return <Leaderboard />;
       case 'achievements':
