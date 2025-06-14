@@ -100,13 +100,7 @@ export const useUserData = () => {
 
         if (transactions && transactions.length === 1) {
           // This is the first mining - complete referral if exists
-          try {
-            await supabase.rpc('complete_referral_bonus', {
-              referred_user_id: user.id
-            });
-          } catch (error) {
-            console.error('Error completing referral bonus:', error);
-          }
+          await completeReferralBonus(user.id);
         }
       }
 
@@ -114,6 +108,62 @@ export const useUserData = () => {
       await fetchUserData();
     } catch (error) {
       console.error('Error updating coins:', error);
+    }
+  };
+
+  const completeReferralBonus = async (referredUserId: string) => {
+    try {
+      // Get pending referral
+      const { data: pendingReferral, error: fetchError } = await supabase
+        .from('pending_referrals')
+        .select('*')
+        .eq('referred_user_id', referredUserId)
+        .eq('status', 'pending')
+        .single();
+
+      if (fetchError || !pendingReferral) {
+        console.log('No pending referral found or error:', fetchError);
+        return;
+      }
+
+      // Award points to referrer
+      const { error: updateWalletError } = await supabase
+        .from('coin_wallets')
+        .update({
+          total_coins: supabase.sql`total_coins + ${pendingReferral.referral_reward}`,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', pendingReferral.referrer_id);
+
+      if (updateWalletError) throw updateWalletError;
+
+      // Record referrer transaction
+      const { error: transactionError } = await supabase
+        .from('coin_transactions')
+        .insert({
+          user_id: pendingReferral.referrer_id,
+          amount: pendingReferral.referral_reward,
+          transaction_type: 'earned',
+          source: 'referral',
+          description: 'Referral bonus - friend completed first mining'
+        });
+
+      if (transactionError) throw transactionError;
+
+      // Mark referral as completed
+      const { error: completeError } = await supabase
+        .from('pending_referrals')
+        .update({
+          status: 'completed',
+          completed_at: new Date().toISOString()
+        })
+        .eq('id', pendingReferral.id);
+
+      if (completeError) throw completeError;
+
+      console.log('Referral bonus completed successfully');
+    } catch (error) {
+      console.error('Error completing referral bonus:', error);
     }
   };
 
