@@ -23,28 +23,28 @@ const SpinButton: React.FC<SpinButtonProps> = ({
         <Button
           onClick={onSpin}
           disabled={isSpinning}
-          className="bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 hover:from-purple-700 hover:via-pink-700 hover:to-orange-700 text-white px-16 py-6 text-2xl font-bold shadow-2xl transform transition-all duration-300 hover:scale-110 disabled:scale-100 disabled:opacity-70 rounded-3xl border-4 border-white relative overflow-hidden"
+          className="bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 hover:from-purple-700 hover:via-pink-700 hover:to-orange-700 text-white px-8 md:px-16 py-4 md:py-6 text-lg md:text-2xl font-bold shadow-2xl transform transition-all duration-300 hover:scale-110 disabled:scale-100 disabled:opacity-70 rounded-2xl md:rounded-3xl border-4 border-white relative overflow-hidden"
         >
           <div className="absolute inset-0 bg-white/10 animate-pulse"></div>
           {isSpinning ? (
             <>
-              <Sparkles className="w-8 h-8 mr-4 animate-spin relative z-10" />
+              <Sparkles className="w-6 h-6 md:w-8 md:h-8 mr-3 md:mr-4 animate-spin relative z-10" />
               <span className="relative z-10">Spinning...</span>
             </>
           ) : (
             <>
-              <Gift className="w-8 h-8 mr-4 animate-pulse relative z-10" />
+              <Gift className="w-6 h-6 md:w-8 md:h-8 mr-3 md:mr-4 animate-pulse relative z-10" />
               <span className="relative z-10">SPIN NOW!</span>
             </>
           )}
         </Button>
       ) : (
         <div className="space-y-4">
-          <Button disabled className="bg-gray-500 text-gray-300 px-16 py-6 text-2xl font-bold rounded-3xl border-4 border-gray-400 opacity-60">
+          <Button disabled className="bg-gray-500 text-gray-300 px-8 md:px-16 py-4 md:py-6 text-lg md:text-2xl font-bold rounded-2xl md:rounded-3xl border-4 border-gray-400 opacity-60">
             Already Spun Today
           </Button>
-          <p className="text-white/80 font-medium text-lg">
-            Next spin in: <Badge variant="outline" className="font-bold text-yellow-400 bg-yellow-400/10 border-yellow-400/30 text-lg px-3 py-1">{getTimeUntilNextSpin()}</Badge>
+          <p className="text-white/80 font-medium text-base md:text-lg">
+            Next spin in: <Badge variant="outline" className="font-bold text-yellow-400 bg-yellow-400/10 border-yellow-400/30 text-sm md:text-lg px-2 md:px-3 py-1">{getTimeUntilNextSpin()}</Badge>
           </p>
         </div>
       )}
