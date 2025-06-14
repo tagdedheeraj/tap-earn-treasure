@@ -19,7 +19,7 @@ const MiningDashboard: React.FC = () => {
   const [miningProgress, setMiningProgress] = useState(0);
   const [canMine, setCanMine] = useState(true);
   const [timeUntilNextMining, setTimeUntilNextMining] = useState(0);
-  const [minedCoins, setMinedCoins] = useState(0);
+  const [canCollect, setCanCollect] = useState(false);
   const [miningSession, setMiningSession] = useState<any>(null);
 
   // Fetch mining session from database
@@ -49,10 +49,30 @@ const MiningDashboard: React.FC = () => {
             const hoursSinceMining = (now - lastMiningTime) / (1000 * 60 * 60);
             
             if (hoursSinceMining < 24) {
+              // Mining is in progress or completed, check the exact state
+              const remainingHours = 24 - hoursSinceMining;
+              const progressPercentage = Math.min(((24 - remainingHours) / 24) * 100, 100);
+              
+              setMiningProgress(progressPercentage);
               setCanMine(false);
-              setTimeUntilNextMining(24 - hoursSinceMining);
+              
+              if (progressPercentage >= 100) {
+                // 24 hours completed, allow collection
+                setCanCollect(true);
+                setIsMining(false);
+              } else {
+                // Still mining
+                setIsMining(true);
+                setCanCollect(false);
+              }
+              
+              setTimeUntilNextMining(remainingHours);
             } else {
+              // Can start new mining
               setCanMine(true);
+              setIsMining(false);
+              setCanCollect(false);
+              setMiningProgress(0);
             }
           }
         }
@@ -65,49 +85,57 @@ const MiningDashboard: React.FC = () => {
     
     const intervalId = setInterval(() => {
       fetchMiningSession();
-    }, 10000); // Refresh every 10 seconds
+    }, 60000); // Check every minute for more accurate updates
     
     return () => clearInterval(intervalId);
   }, [user]);
 
-  // Timer for mining progress update
+  // Timer for mining progress update - updates every minute for 24 hours
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
-    if (isMining) {
+    if (isMining && miningSession?.last_mining_time) {
       interval = setInterval(() => {
-        setMiningProgress(prev => {
-          const newProgress = prev + 1;
-          const newMinedCoins = Math.min(newProgress, 100);
-          setMinedCoins(newMinedCoins);
+        const lastMiningTime = new Date(miningSession.last_mining_time).getTime();
+        const now = Date.now();
+        const hoursPassed = (now - lastMiningTime) / (1000 * 60 * 60);
+        const progressPercentage = Math.min((hoursPassed / 24) * 100, 100);
+        
+        setMiningProgress(progressPercentage);
+        
+        if (progressPercentage >= 100) {
+          // 24 hours completed
+          setIsMining(false);
+          setCanCollect(true);
+          clearInterval(interval);
           
-          if (newProgress >= 100) {
-            clearInterval(interval);
-            setIsMining(false);
-          }
-          
-          return newProgress > 100 ? 100 : newProgress;
-        });
-      }, 600); // Speed adjusted for quicker mining (for testing purposes)
+          toast({
+            title: "Mining Complete! 🎉",
+            description: "Your 24-hour mining session is complete! Collect your 100 coins now.",
+          });
+        }
+      }, 60000); // Update every minute
     }
     
     return () => clearInterval(interval);
-  }, [isMining]);
+  }, [isMining, miningSession]);
 
-  // Timer for countdown
+  // Timer for countdown display
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
     if (!canMine && timeUntilNextMining > 0) {
       interval = setInterval(() => {
         setTimeUntilNextMining(prev => {
-          if (prev <= 0.1) {
+          const newTime = prev - (1/60); // Decrease by 1 minute
+          if (newTime <= 0) {
             setCanMine(true);
+            setCanCollect(true);
             return 0;
           }
-          return prev - 0.1;
+          return newTime;
         });
-      }, 6000); // Update every 6 seconds for demo purposes
+      }, 60000); // Update every minute
     }
     
     return () => clearInterval(interval);
@@ -133,11 +161,19 @@ const MiningDashboard: React.FC = () => {
         
         setIsMining(true);
         setMiningProgress(0);
-        setMinedCoins(0);
+        setCanMine(false);
+        setCanCollect(false);
+        setTimeUntilNextMining(24);
+        
+        // Update mining session state
+        setMiningSession(prev => ({
+          ...prev,
+          last_mining_time: now
+        }));
         
         toast({
           title: "Mining Started! ⛏️",
-          description: "Your mining session has begun. Wait for it to complete!",
+          description: "Your 24-hour mining session has begun. Come back in 24 hours to collect your coins!",
         });
       } catch (error) {
         console.error('Error starting mining:', error);
@@ -154,7 +190,7 @@ const MiningDashboard: React.FC = () => {
 
   const completeMining = async () => {
     const completeMiningAction = async () => {
-      if (!user) return;
+      if (!user || !canCollect) return;
       
       try {
         const now = new Date().toISOString();
@@ -170,21 +206,25 @@ const MiningDashboard: React.FC = () => {
         
         if (error) throw error;
         
-        // Award 100 coins as per strategy
-        await updateCoins(100, 'mining', 'Daily mining reward');
+        // Award 100 coins
+        await updateCoins(100, 'mining', 'Daily mining reward - 24 hours completed');
         
-        setCanMine(false);
-        setTimeUntilNextMining(24);
+        // Reset states for next mining cycle
+        setCanMine(true);
+        setCanCollect(false);
+        setMiningProgress(0);
+        setIsMining(false);
+        setTimeUntilNextMining(0);
         
         toast({
-          title: "Mining Complete! 🎉",
-          description: `You earned 100 coins! Come back in 24 hours to mine again.`,
+          title: "Coins Collected! 🎉",
+          description: `You earned 100 coins! You can start mining again now.`,
         });
       } catch (error) {
         console.error('Error completing mining:', error);
         toast({
           title: "Error",
-          description: "Failed to save mining reward. Please try again.",
+          description: "Failed to collect mining reward. Please try again.",
           variant: "destructive",
         });
       }
@@ -193,18 +233,23 @@ const MiningDashboard: React.FC = () => {
     requireAuth(completeMiningAction);
   };
 
-  const collectMining = () => {
-    if (miningProgress === 100 && minedCoins > 0) {
-      completeMining();
-      setMiningProgress(0);
-      setMinedCoins(0);
-    }
-  };
-
   const formatTimeRemaining = (hours: number) => {
     const h = Math.floor(hours);
     const m = Math.floor((hours - h) * 60);
     return `${h}h ${m}m`;
+  };
+
+  const formatMiningStatus = () => {
+    if (isMining) {
+      return `Mining... ${Math.floor(miningProgress)}% complete`;
+    }
+    if (canCollect) {
+      return "Ready to collect!";
+    }
+    if (!canMine) {
+      return `Next mining in: ${formatTimeRemaining(timeUntilNextMining)}`;
+    }
+    return "Ready to mine";
   };
 
   return (
@@ -230,37 +275,46 @@ const MiningDashboard: React.FC = () => {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-sm">Progress</span>
+              <span className="text-sm">Progress (24 Hours)</span>
               <Badge variant="secondary" className="bg-white/20 text-white">
-                {miningProgress}/100
+                {Math.floor(miningProgress)}/100
               </Badge>
             </div>
             <Progress value={miningProgress} className="h-3 bg-white/20" />
             <div className="flex justify-between items-center text-sm">
-              <span>Mined: {minedCoins} coins</span>
-              {isMining && <span className="animate-pulse">⛏️ Mining...</span>}
+              <span>{formatMiningStatus()}</span>
+              {canCollect && <span className="animate-pulse text-yellow-300">💰 Ready!</span>}
             </div>
           </div>
 
           <div className="text-center">
-            {canMine && miningProgress === 0 ? (
+            {canMine && !isMining && !canCollect ? (
               <Button
                 onClick={startMining}
-                disabled={isMining}
                 className="w-full bg-white text-purple-600 hover:bg-gray-100 font-bold py-3 text-lg"
               >
                 <Pickaxe className="w-5 h-5 mr-2" />
-                Start Mining
+                Start 24-Hour Mining
               </Button>
-            ) : miningProgress === 100 ? (
+            ) : canCollect ? (
               <Button
-                onClick={collectMining}
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 text-lg"
+                onClick={completeMining}
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 text-lg animate-pulse"
               >
                 <Coins className="w-5 h-5 mr-2" />
                 Collect 100 Coins
               </Button>
-            ) : !canMine ? (
+            ) : isMining ? (
+              <div className="text-center space-y-2">
+                <div className="flex items-center justify-center gap-2 text-purple-100">
+                  <Clock className="w-5 h-5" />
+                  <span>Time remaining: {formatTimeRemaining(24 - (miningProgress / 100 * 24))}</span>
+                </div>
+                <Button disabled className="w-full bg-white/20 text-white/50 font-bold py-3 text-lg">
+                  Mining in Progress... {Math.floor(miningProgress)}%
+                </Button>
+              </div>
+            ) : (
               <div className="text-center space-y-2">
                 <div className="flex items-center justify-center gap-2 text-purple-100">
                   <Clock className="w-5 h-5" />
@@ -270,13 +324,6 @@ const MiningDashboard: React.FC = () => {
                   Mining on Cooldown
                 </Button>
               </div>
-            ) : (
-              <Button
-                disabled
-                className="w-full bg-white/20 text-white/50 font-bold py-3 text-lg"
-              >
-                Mining in Progress...
-              </Button>
             )}
           </div>
         </CardContent>
