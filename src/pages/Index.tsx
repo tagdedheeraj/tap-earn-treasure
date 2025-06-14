@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Coins, Play, Trophy, Gift, Users, BookOpen, LogOut, TrendingUp, Calendar, Star, Sparkles } from 'lucide-react';
+import { Coins, Play, Trophy, Gift, Users, BookOpen, LogOut, TrendingUp, Calendar, Star, Sparkles, Gamepad2 } from 'lucide-react';
 import MiningDashboard from '@/components/MiningDashboard';
 import QuickActions from '@/components/QuickActions';
 import CoinWallet from '@/components/CoinWallet';
 import TasksList from '@/components/TasksList';
 import QuizSection from '@/components/QuizSection';
 import RewardsSection from '@/components/RewardsSection';
+import MiniGamesSection from '@/components/MiniGamesSection';
 import ProfileHeader from '@/components/ProfileHeader';
 import NotificationCenter from '@/components/NotificationCenter';
 import { useAuth } from '@/hooks/useAuth';
@@ -28,8 +29,9 @@ const Index = () => {
     { id: 'home', label: 'Home', icon: Play, gradient: 'from-blue-500 to-purple-500' },
     { id: 'tasks', label: 'Tasks', icon: Trophy, gradient: 'from-orange-500 to-red-500' },
     { id: 'quiz', label: 'Quiz', icon: BookOpen, gradient: 'from-green-500 to-emerald-500' },
-    { id: 'rewards', label: 'Rewards', icon: Gift, gradient: 'from-pink-500 to-rose-500' },
-    { id: 'profile', label: 'Profile', icon: Users, gradient: 'from-indigo-500 to-purple-500' },
+    { id: 'games', label: 'Games', icon: Gamepad2, gradient: 'from-pink-500 to-purple-500' },
+    { id: 'rewards', label: 'Rewards', icon: Gift, gradient: 'from-indigo-500 to-blue-500' },
+    { id: 'profile', label: 'Profile', icon: Users, gradient: 'from-gray-500 to-slate-500' },
   ];
 
   const handleNavigateToQuiz = () => {
@@ -53,6 +55,14 @@ const Index = () => {
     toast({
       title: "🎁 Rewards",
       description: "Check out available rewards and offers!",
+    });
+  };
+
+  const handleNavigateToMiniGames = () => {
+    setActiveTab('games');
+    toast({
+      title: "🎮 Mini Games",
+      description: "Play fun games to earn up to 50 points daily!",
     });
   };
 
@@ -80,6 +90,7 @@ const Index = () => {
               onNavigateToQuiz={handleNavigateToQuiz}
               onNavigateToTasks={handleNavigateToTasks}
               onNavigateToRewards={handleNavigateToRewards}
+              onNavigateToMiniGames={handleNavigateToMiniGames}
             />
             <CoinWallet />
           </div>
@@ -88,6 +99,8 @@ const Index = () => {
         return <TasksList onNavigateToQuiz={handleNavigateToQuiz} />;
       case 'quiz':
         return <QuizSection />;
+      case 'games':
+        return <MiniGamesSection />;
       case 'rewards':
         return <RewardsSection />;
       case 'profile':
