@@ -3,17 +3,16 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Play, Trophy, BookOpen, Gift, Gamepad2 } from 'lucide-react';
+import { Play, Trophy, BookOpen, Gift } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface QuickActionsProps {
   onNavigateToQuiz?: () => void;
   onNavigateToTasks?: () => void;
   onNavigateToRewards?: () => void;
-  onNavigateToMiniGames?: () => void;
 }
 
-const QuickActions = ({ onNavigateToQuiz, onNavigateToTasks, onNavigateToRewards, onNavigateToMiniGames }: QuickActionsProps) => {
+const QuickActions = ({ onNavigateToQuiz, onNavigateToTasks, onNavigateToRewards }: QuickActionsProps) => {
   const handleWatchAd = () => {
     toast({
       title: "📺 Watch Ad",
@@ -54,17 +53,6 @@ const QuickActions = ({ onNavigateToQuiz, onNavigateToTasks, onNavigateToRewards
     }
   };
 
-  const handleMiniGames = () => {
-    if (onNavigateToMiniGames) {
-      onNavigateToMiniGames();
-    } else {
-      toast({
-        title: "🎮 Mini Games",
-        description: "Play games to earn 50 points daily!",
-      });
-    }
-  };
-
   const actions = [
     {
       icon: Play,
@@ -89,14 +77,6 @@ const QuickActions = ({ onNavigateToQuiz, onNavigateToTasks, onNavigateToRewards
       color: 'bg-blue-500',
       available: null,
       onClick: handleDailyQuiz,
-    },
-    {
-      icon: Gamepad2,
-      title: 'Mini Games',
-      reward: '+50 points',
-      color: 'bg-pink-500',
-      available: null,
-      onClick: handleMiniGames,
     },
     {
       icon: Gift,
