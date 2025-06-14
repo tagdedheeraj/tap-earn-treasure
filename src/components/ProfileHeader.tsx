@@ -29,7 +29,7 @@ const ProfileHeader = ({ profile, wallet, userLevel, loginStreak }: ProfileHeade
       setCopied(true);
       toast({
         title: "Referral Code Copied! 📋",
-        description: "Share with friends to earn 100 coins per successful referral!",
+        description: "Share with friends to earn 100 points per successful referral!",
       });
       setTimeout(() => setCopied(false), 2000);
     }
@@ -148,7 +148,7 @@ const ProfileHeader = ({ profile, wallet, userLevel, loginStreak }: ProfileHeade
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="bg-white/15 backdrop-blur-sm rounded-lg p-4 text-center">
             <div className="flex items-center justify-center mb-2">
-              <span className="text-sm text-white/80">Total Coins</span>
+              <span className="text-sm text-white/80">Total Points</span>
             </div>
             <div className="text-2xl font-bold text-white">{wallet?.total_coins || 0}</div>
           </div>

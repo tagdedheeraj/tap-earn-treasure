@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -82,8 +83,8 @@ const RewardsSection: React.FC = () => {
       
       if (totalCoins < reward.cost) {
         toast({
-          title: "Insufficient Coins",
-          description: `You need ${reward.cost - totalCoins} more coins to redeem this reward.`,
+          title: "Insufficient Points",
+          description: `You need ${reward.cost - totalCoins} more points to redeem this reward.`,
           variant: "destructive",
         });
         return;
@@ -133,13 +134,13 @@ const RewardsSection: React.FC = () => {
             <Gift className="w-6 h-6 text-purple-600" />
             Rewards Store
           </CardTitle>
-          <p className="text-sm text-gray-600">Start from ₹50 rewards at 1500 coins</p>
+          <p className="text-sm text-gray-600">Start from ₹50 rewards at 1500 points</p>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white p-4 rounded-lg border text-center">
               <p className="text-2xl font-bold text-purple-600">{totalCoins}</p>
-              <p className="text-sm text-gray-600">Available Coins</p>
+              <p className="text-sm text-gray-600">Available Points</p>
             </div>
             <div className="bg-white p-4 rounded-lg border text-center">
               <p className="text-2xl font-bold text-green-600">{redemptions.length}</p>
@@ -198,7 +199,7 @@ const RewardsSection: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1">
                         <span className="text-lg font-bold text-purple-600">{reward.cost}</span>
-                        <span className="text-sm text-gray-500">coins</span>
+                        <span className="text-sm text-gray-500">points</span>
                       </div>
                       
                       <Button

@@ -173,7 +173,7 @@ const MiningDashboard: React.FC = () => {
         
         toast({
           title: "Mining Started! ⛏️",
-          description: "Your 24-hour mining session has begun. Come back in 24 hours to collect your coins!",
+          description: "Your 24-hour mining session has begun. Come back in 24 hours to collect your points!",
         });
       } catch (error) {
         console.error('Error starting mining:', error);
@@ -206,7 +206,7 @@ const MiningDashboard: React.FC = () => {
         
         if (error) throw error;
         
-        // Award 100 coins
+        // Award 100 points
         await updateCoins(100, 'mining', 'Daily mining reward - 24 hours completed');
         
         // Reset states for next mining cycle
@@ -217,8 +217,8 @@ const MiningDashboard: React.FC = () => {
         setTimeUntilNextMining(0);
         
         toast({
-          title: "Coins Collected! 🎉",
-          description: `You earned 100 coins! You can start mining again now.`,
+          title: "Points Collected! 🎉",
+          description: `You earned 100 points! You can start mining again now.`,
         });
       } catch (error) {
         console.error('Error completing mining:', error);
@@ -269,7 +269,7 @@ const MiningDashboard: React.FC = () => {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold">Daily Mining</CardTitle>
-          <p className="text-purple-100">Mine 100 coins every 24 hours</p>
+          <p className="text-purple-100">Mine 100 points every 24 hours</p>
         </CardHeader>
         
         <CardContent className="space-y-6">
@@ -302,7 +302,7 @@ const MiningDashboard: React.FC = () => {
                 className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 text-lg animate-pulse"
               >
                 <Coins className="w-5 h-5 mr-2" />
-                Collect 100 Coins
+                Collect 100 Points
               </Button>
             ) : isMining ? (
               <div className="text-center space-y-2">

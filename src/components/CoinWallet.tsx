@@ -10,7 +10,7 @@ import { useUserData } from '@/hooks/useUserData';
 interface Transaction {
   id: string;
   amount: number;
-  transaction_type: string; // Changed from 'earned' | 'spent' to string
+  transaction_type: string;
   source: string;
   description: string | null;
   created_at: string;
@@ -89,7 +89,7 @@ const CoinWallet: React.FC = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Coins className="w-5 h-5 text-yellow-500" />
-          Coin Wallet
+          Point Wallet
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -98,7 +98,7 @@ const CoinWallet: React.FC = () => {
             <div>
               <p className="text-sm text-gray-600">Total Balance</p>
               <p className="text-2xl font-bold text-yellow-600">
-                {wallet?.total_coins || 0} coins
+                {wallet?.total_coins || 0} points
               </p>
             </div>
             <div className="text-right">
@@ -156,7 +156,7 @@ const CoinWallet: React.FC = () => {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-center py-4">No transactions yet. Start earning coins!</p>
+            <p className="text-gray-500 text-center py-4">No transactions yet. Start earning points!</p>
           )}
         </div>
       </CardContent>

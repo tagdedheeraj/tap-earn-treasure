@@ -98,19 +98,19 @@ const QuizSection: React.FC = () => {
 
   const finishQuiz = async () => {
     setShowResult(true);
-    const coinsEarned = score * 5; // 5 coins per correct answer
+    const coinsEarned = score * 5; // 5 points per correct answer
     
     try {
       await updateCoins(coinsEarned, 'quiz', `Daily quiz completed: ${score}/${questions.length} correct`);
       toast({
         title: "Quiz Completed! 🎉",
-        description: `You scored ${score}/${questions.length} and earned ${coinsEarned} coins!`,
+        description: `You scored ${score}/${questions.length} and earned ${coinsEarned} points!`,
       });
     } catch (error) {
       console.error('Error updating coins:', error);
       toast({
         title: "Quiz Completed!",
-        description: `You scored ${score}/${questions.length}. There was an issue saving your coins.`,
+        description: `You scored ${score}/${questions.length}. There was an issue saving your points.`,
         variant: "destructive",
       });
     }
@@ -125,7 +125,7 @@ const QuizSection: React.FC = () => {
               <BookOpen className="w-8 h-8" />
             </div>
             <CardTitle className="text-2xl">Daily Quiz</CardTitle>
-            <p className="text-gray-600">Test your knowledge and earn coins!</p>
+            <p className="text-gray-600">Test your knowledge and earn points!</p>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4 text-center">
@@ -135,14 +135,14 @@ const QuizSection: React.FC = () => {
               </div>
               <div className="bg-white p-4 rounded-lg border">
                 <p className="text-2xl font-bold text-green-600">25</p>
-                <p className="text-sm text-gray-600">Max Coins</p>
+                <p className="text-sm text-gray-600">Max Points</p>
               </div>
             </div>
             
             <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
               <h4 className="font-semibold text-yellow-800 mb-2">Quiz Rules:</h4>
               <ul className="text-sm text-yellow-700 space-y-1">
-                <li>• 5 coins per correct answer</li>
+                <li>• 5 points per correct answer</li>
                 <li>• 30 seconds per question</li>
                 <li>• One quiz per day</li>
                 <li>• No skipping questions</li>
@@ -176,7 +176,7 @@ const QuizSection: React.FC = () => {
             <p className="text-4xl font-bold text-green-600">{score}/{questions.length}</p>
             <p className="text-gray-600">Correct Answers</p>
             <Badge className="bg-green-500 text-white text-lg px-4 py-2">
-              +{score * 5} Coins Earned
+              +{score * 5} Points Earned
             </Badge>
           </div>
           
@@ -267,7 +267,7 @@ const QuizSection: React.FC = () => {
         
         <div className="text-center">
           <p className="text-sm text-gray-600">
-            Score: {score}/{currentQuestion + (isAnswered ? 1 : 0)} • Potential: +{score * 5} coins
+            Score: {score}/{currentQuestion + (isAnswered ? 1 : 0)} • Potential: +{score * 5} points
           </p>
         </div>
       </CardContent>

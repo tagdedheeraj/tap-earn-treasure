@@ -18,7 +18,7 @@ const TasksList: React.FC = () => {
     {
       id: 1,
       title: 'Watch Video Ads',
-      description: 'Watch 3 rewarded video ads to earn coins',
+      description: 'Watch 3 rewarded video ads to earn points',
       reward: 50,
       progress: 0,
       total: 3,
@@ -88,7 +88,7 @@ const TasksList: React.FC = () => {
             updateCoins(task.reward, 'task', `Task completion: ${task.title}`);
             toast({
               title: "Task Completed! 🎉",
-              description: `You earned ${task.reward} coins!`,
+              description: `You earned ${task.reward} points!`,
             });
           }
           
@@ -121,7 +121,7 @@ const TasksList: React.FC = () => {
             <Trophy className="w-6 h-6 text-blue-600" />
             Daily Tasks & Bonuses
           </CardTitle>
-          <p className="text-sm text-gray-600">Complete tasks to earn 30-50 coins daily</p>
+          <p className="text-sm text-gray-600">Complete tasks to earn 30-50 points daily</p>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-3 gap-4 text-center">
@@ -135,7 +135,7 @@ const TasksList: React.FC = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-green-600">{tasks.reduce((sum, t) => sum + (t.completed ? t.reward : 0), 0)}</p>
-              <p className="text-sm text-gray-600">Coins Earned</p>
+              <p className="text-sm text-gray-600">Points Earned</p>
             </div>
           </div>
         </CardContent>
@@ -170,7 +170,7 @@ const TasksList: React.FC = () => {
                           {task.type}
                         </Badge>
                         <p className="text-lg font-bold text-yellow-600 mt-1">
-                          +{task.reward} coins
+                          +{task.reward} points
                         </p>
                       </div>
                     </div>

@@ -10,7 +10,7 @@ const QuickActions = () => {
     {
       icon: Play,
       title: 'Watch Ad',
-      reward: '+5 coins',
+      reward: '+5 points',
       color: 'bg-green-500',
       available: 8,
     },
