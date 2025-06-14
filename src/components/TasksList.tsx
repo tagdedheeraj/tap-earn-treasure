@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, Clock, Play, Trophy, Users, Calendar } from 'lucide-react';
+import { CheckCircle, Clock, Play, Trophy, Users, Calendar, Gift } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useUserData } from '@/hooks/useUserData';
 
@@ -17,10 +17,10 @@ const TasksList: React.FC = () => {
   const [tasks, setTasks] = useState([
     {
       id: 1,
-      title: 'Watch 3 Video Ads',
-      description: 'Watch rewarded video ads to earn coins',
-      reward: 15,
-      progress: 1,
+      title: 'Watch Video Ads',
+      description: 'Watch 3 rewarded video ads to earn coins',
+      reward: 50,
+      progress: 0,
       total: 3,
       type: 'daily',
       completed: false,
@@ -31,7 +31,7 @@ const TasksList: React.FC = () => {
       id: 2,
       title: 'Complete Daily Quiz',
       description: 'Answer 5 questions correctly',
-      reward: 25,
+      reward: 20,
       progress: 0,
       total: 1,
       type: 'daily',
@@ -41,12 +41,12 @@ const TasksList: React.FC = () => {
     },
     {
       id: 3,
-      title: 'Invite a Friend',
-      description: 'Share your referral code with friends',
+      title: 'Invite Friends',
+      description: 'Invite friends who complete their first mining',
       reward: 100,
       progress: 0,
       total: 1,
-      type: 'weekly',
+      type: 'referral',
       completed: false,
       icon: Users,
       color: 'bg-purple-500',
@@ -55,13 +55,25 @@ const TasksList: React.FC = () => {
       id: 4,
       title: '7-Day Login Streak',
       description: 'Login daily for 7 consecutive days',
-      reward: 200,
+      reward: 100,
       progress: 3,
       total: 7,
       type: 'streak',
       completed: false,
       icon: Calendar,
       color: 'bg-orange-500',
+    },
+    {
+      id: 5,
+      title: 'Weekly Bonus',
+      description: 'Complete all daily tasks for a week',
+      reward: 200,
+      progress: 0,
+      total: 7,
+      type: 'weekly',
+      completed: false,
+      icon: Gift,
+      color: 'bg-pink-500',
     },
   ]);
 
@@ -96,20 +108,20 @@ const TasksList: React.FC = () => {
       case 'daily': return 'bg-blue-100 text-blue-700';
       case 'weekly': return 'bg-purple-100 text-purple-700';
       case 'streak': return 'bg-orange-100 text-orange-700';
+      case 'referral': return 'bg-green-100 text-green-700';
       default: return 'bg-gray-100 text-gray-700';
     }
   };
 
   return (
     <div className="space-y-6">
-      {/* Tasks Overview */}
       <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Trophy className="w-6 h-6 text-blue-600" />
-            Daily Tasks
+            Daily Tasks & Bonuses
           </CardTitle>
-          <p className="text-sm text-gray-600">Complete tasks to earn bonus coins</p>
+          <p className="text-sm text-gray-600">Complete tasks to earn 30-50 coins daily</p>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-3 gap-4 text-center">

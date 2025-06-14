@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -142,7 +141,6 @@ const MiningDashboard: React.FC = () => {
       if (!canMine || !user) return;
       
       try {
-        // Update mining session in database using standard Supabase methods
         const now = new Date().toISOString();
         const updateData: any = {
           mining_progress: 0,
@@ -150,12 +148,12 @@ const MiningDashboard: React.FC = () => {
           last_mining_time: now
         };
 
-        // Try to add new columns if they exist
+        // Add new columns safely
         try {
           updateData.is_mining_active = true;
           updateData.mining_started_at = now;
         } catch (e) {
-          // Ignore if columns don't exist yet
+          // Columns don't exist yet
         }
 
         const { error } = await supabase
@@ -165,7 +163,6 @@ const MiningDashboard: React.FC = () => {
         
         if (error) throw error;
         
-        // Start mining animation locally
         setIsMining(true);
         setMiningProgress(0);
         setMinedCoins(0);
@@ -187,7 +184,6 @@ const MiningDashboard: React.FC = () => {
       if (!user) return;
       
       try {
-        // Update mining session in database
         const now = new Date().toISOString();
         const updateData: any = {
           mining_progress: 100,
@@ -195,12 +191,12 @@ const MiningDashboard: React.FC = () => {
           last_mining_time: now
         };
 
-        // Try to add new columns if they exist
+        // Add new columns safely
         try {
           updateData.is_mining_active = false;
           updateData.mining_completed_at = now;
         } catch (e) {
-          // Ignore if columns don't exist yet
+          // Columns don't exist yet
         }
 
         const { error } = await supabase
@@ -210,7 +206,7 @@ const MiningDashboard: React.FC = () => {
         
         if (error) throw error;
         
-        // Update coins in database
+        // Award 100 coins as per strategy
         await updateCoins(100, 'mining', 'Daily mining reward');
         
         setCanMine(false);
@@ -264,11 +260,10 @@ const MiningDashboard: React.FC = () => {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold">Daily Mining</CardTitle>
-          <p className="text-purple-100">Mine up to 100 coins every 24 hours</p>
+          <p className="text-purple-100">Mine 100 coins every 24 hours</p>
         </CardHeader>
         
         <CardContent className="space-y-6">
-          {/* Mining Progress */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-sm">Progress</span>
@@ -283,7 +278,6 @@ const MiningDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Action Button */}
           <div className="text-center">
             {canMine && miningProgress === 0 ? (
               <Button

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,69 +12,69 @@ const RewardsSection: React.FC = () => {
   const { wallet, updateCoins } = useUserData();
   const { requireAuth, AuthDialog } = useRequireAuth();
   const [redemptions, setRedemptions] = useState([
-    { id: 1, item: 'Amazon Gift Card', amount: '$5', status: 'pending', date: '2024-01-15' },
-    { id: 2, item: 'Google Play Card', amount: '$10', status: 'approved', date: '2024-01-10' },
+    { id: 1, item: '₹50 Gift Card', amount: '₹50', status: 'pending', date: '2024-01-15' },
+    { id: 2, item: '₹100 Gift Card', amount: '₹100', status: 'approved', date: '2024-01-10' },
   ]);
 
   const rewards = [
     {
       id: 1,
-      name: 'Amazon Gift Card',
-      description: '$5 Amazon Gift Card',
-      cost: 1000,
+      name: '₹50 Gift Card',
+      description: '₹50 Amazon/Flipkart Gift Card',
+      cost: 1500,
       image: '🎁',
       category: 'Gift Cards',
       popular: true,
     },
     {
       id: 2,
-      name: 'Google Play Card',
-      description: '$10 Google Play Store Credit',
-      cost: 2000,
-      image: '🎮',
+      name: '₹100 Gift Card',
+      description: '₹100 Amazon/Flipkart Gift Card',
+      cost: 2800,
+      image: '💳',
       category: 'Gift Cards',
-      popular: false,
-    },
-    {
-      id: 3,
-      name: 'PayPal Cash',
-      description: '$5 PayPal Cash',
-      cost: 1200,
-      image: '💰',
-      category: 'Cash',
       popular: true,
     },
     {
+      id: 3,
+      name: '₹200 USB Drive',
+      description: '32GB High-Speed USB Drive',
+      cost: 5000,
+      image: '💾',
+      category: 'Electronics',
+      popular: false,
+    },
+    {
       id: 4,
-      name: 'Netflix Subscription',
-      description: '1 Month Netflix Premium',
-      cost: 3000,
-      image: '📺',
-      category: 'Subscriptions',
+      name: 'PayPal Cash ₹50',
+      description: '₹50 PayPal Cash Transfer',
+      cost: 1600,
+      image: '💰',
+      category: 'Cash',
       popular: false,
     },
     {
       id: 5,
-      name: 'Steam Gift Card',
-      description: '$20 Steam Wallet Code',
-      cost: 4000,
-      image: '🎯',
+      name: 'Steam Gift Card ₹100',
+      description: '₹100 Steam Wallet Code',
+      cost: 3000,
+      image: '🎮',
       category: 'Gaming',
       popular: false,
     },
     {
       id: 6,
-      name: 'Spotify Premium',
-      description: '3 Months Spotify Premium',
-      cost: 2500,
-      image: '🎵',
-      category: 'Subscriptions',
-      popular: false,
+      name: 'Mobile Recharge ₹100',
+      description: '₹100 Mobile Recharge',
+      cost: 2700,
+      image: '📱',
+      category: 'Recharge',
+      popular: true,
     },
   ];
 
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const categories = ['All', 'Gift Cards', 'Cash', 'Gaming', 'Subscriptions'];
+  const categories = ['All', 'Gift Cards', 'Cash', 'Gaming', 'Electronics', 'Recharge'];
 
   const handleRedeem = async (reward: typeof rewards[0]) => {
     const redeemAction = async () => {
@@ -134,7 +133,7 @@ const RewardsSection: React.FC = () => {
             <Gift className="w-6 h-6 text-purple-600" />
             Rewards Store
           </CardTitle>
-          <p className="text-sm text-gray-600">Redeem your coins for amazing rewards</p>
+          <p className="text-sm text-gray-600">Start from ₹50 rewards at 1500 coins</p>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
@@ -151,7 +150,7 @@ const RewardsSection: React.FC = () => {
           <Link to="/gadgets">
             <Button className="w-full mt-4 bg-gradient-to-r from-indigo-500 to-purple-600">
               <Smartphone className="w-4 h-4 mr-2" />
-              Browse Gadget Store
+              Browse Premium Gadgets
             </Button>
           </Link>
         </CardContent>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -36,15 +35,14 @@ const GadgetsPage: React.FC = () => {
   const fetchGadgets = async () => {
     setLoading(true);
     try {
-      // For now, use sample data since gadgets table doesn't exist in types yet
-      console.log('Loading sample gadgets data...');
+      console.log('Loading premium gadgets data...');
       setGadgets([
         {
           id: '1',
           name: 'iPhone 15',
           description: 'Latest iPhone 15 with 128GB storage',
           image_url: null,
-          coin_cost: 150000,
+          coin_cost: 200000, // Higher threshold for premium items
           category: 'smartphones',
           is_available: true
         },
@@ -53,7 +51,7 @@ const GadgetsPage: React.FC = () => {
           name: 'Samsung Galaxy S24',
           description: 'Samsung Galaxy S24 Ultra 256GB',
           image_url: null,
-          coin_cost: 140000,
+          coin_cost: 180000,
           category: 'smartphones',
           is_available: true
         },
@@ -62,7 +60,7 @@ const GadgetsPage: React.FC = () => {
           name: 'Apple AirPods Pro',
           description: 'Wireless earbuds with noise cancellation',
           image_url: null,
-          coin_cost: 25000,
+          coin_cost: 35000,
           category: 'audio',
           is_available: true
         },
@@ -71,7 +69,7 @@ const GadgetsPage: React.FC = () => {
           name: 'MacBook Air M3',
           description: 'Apple MacBook Air with M3 chip, 13-inch',
           image_url: null,
-          coin_cost: 200000,
+          coin_cost: 350000, // Premium laptop pricing
           category: 'laptops',
           is_available: true
         },
@@ -80,7 +78,7 @@ const GadgetsPage: React.FC = () => {
           name: 'Sony WH-1000XM5',
           description: 'Premium noise-canceling headphones',
           image_url: null,
-          coin_cost: 35000,
+          coin_cost: 45000,
           category: 'audio',
           is_available: true
         },
@@ -89,8 +87,26 @@ const GadgetsPage: React.FC = () => {
           name: 'Dell XPS 13',
           description: 'Dell XPS 13 laptop with Intel i7',
           image_url: null,
-          coin_cost: 180000,
+          coin_cost: 280000,
           category: 'laptops',
+          is_available: true
+        },
+        {
+          id: '7',
+          name: 'iPad Air',
+          description: 'iPad Air with M2 chip, 64GB',
+          image_url: null,
+          coin_cost: 120000,
+          category: 'tablets',
+          is_available: true
+        },
+        {
+          id: '8',
+          name: 'Gaming Mouse',
+          description: 'High-precision gaming mouse',
+          image_url: null,
+          coin_cost: 15000,
+          category: 'accessories',
           is_available: true
         }
       ]);
@@ -129,10 +145,8 @@ const GadgetsPage: React.FC = () => {
       }
 
       try {
-        // Deduct coins
         await updateCoins(-gadget.coin_cost, 'redemption', `Redeemed ${gadget.name}`);
         
-        // Add redemption record
         const { error } = await supabase
           .from('redemptions')
           .insert({
@@ -186,7 +200,7 @@ const GadgetsPage: React.FC = () => {
             <ArrowLeft className="w-5 h-5 mr-1" />
             Back
           </Button>
-          <h1 className="text-xl font-bold">Gadget Store</h1>
+          <h1 className="text-xl font-bold">Premium Gadget Store</h1>
           {isAuthenticated && (
             <div className="flex items-center gap-2 bg-white/20 rounded-full px-3 py-1">
               <ShoppingCart className="w-4 h-4" />
@@ -202,11 +216,11 @@ const GadgetsPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Gift className="w-6 h-6 text-purple-600" />
-              Redeem Your Coins
+              Premium Gadgets
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600">Browse our collection of gadgets that you can redeem using your earned coins.</p>
+            <p className="text-gray-600">Premium gadgets for dedicated users. Save up for amazing tech!</p>
             {isAuthenticated ? (
               <div className="mt-2 p-2 bg-white rounded-lg border text-center">
                 <p className="text-sm text-gray-500">Available Balance</p>
