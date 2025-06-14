@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Coins, Play, Trophy, Gift, Users, BookOpen, LogOut, Copy, Check } from 'lucide-react';
+import { Coins, Play, Trophy, Gift, Users, BookOpen, LogOut, Copy, Check, Crown, Star, TrendingUp, Calendar } from 'lucide-react';
 import MiningDashboard from '@/components/MiningDashboard';
 import QuickActions from '@/components/QuickActions';
 import CoinWallet from '@/components/CoinWallet';
@@ -53,7 +53,7 @@ const Index = () => {
         </div>
       </div>
     );
-  }
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -74,107 +74,186 @@ const Index = () => {
       case 'profile':
         return (
           <div className="space-y-6">
-            <Card className="bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200">
-              <CardHeader className="text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full mx-auto flex items-center justify-center text-white text-2xl font-bold">
-                  {profile?.username?.[0]?.toUpperCase() || 'U'}
+            {/* Enhanced Profile Header Card */}
+            <Card className="bg-gradient-to-br from-purple-600 via-purple-500 to-blue-600 border-0 text-white overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12"></div>
+              
+              <CardHeader className="text-center relative z-10 pb-4">
+                <div className="relative mx-auto mb-4">
+                  <div className="w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full mx-auto flex items-center justify-center text-white text-3xl font-bold shadow-lg">
+                    {profile?.username?.[0]?.toUpperCase() || 'U'}
+                  </div>
+                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
+                    <Crown className="w-4 h-4 text-yellow-800" />
+                  </div>
                 </div>
-                <CardTitle className="text-2xl">
-                  {profile?.username || 'User Profile'}
+                
+                <CardTitle className="text-2xl font-bold text-white mb-2">
+                  {profile?.username || 'GiftLeap User'}
                 </CardTitle>
-                <div className="flex justify-center gap-4 mt-4">
-                  <Badge variant="secondary" className="bg-purple-100 text-purple-700">
+                
+                <div className="flex justify-center gap-3 mb-4">
+                  <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30">
+                    <Star className="w-3 h-3 mr-1" />
                     Level {userLevel}
                   </Badge>
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                  <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30">
+                    <Calendar className="w-3 h-3 mr-1" />
                     {loginStreak} Day Streak
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Total Coins</span>
-                    <span className="font-bold text-lg">{wallet?.total_coins || 0}</span>
+              
+              <CardContent className="relative z-10 pt-0">
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="bg-white/15 backdrop-blur-sm rounded-lg p-4 text-center">
+                    <div className="flex items-center justify-center mb-2">
+                      <Coins className="w-5 h-5 text-yellow-300 mr-2" />
+                      <span className="text-sm text-white/80">Total Coins</span>
+                    </div>
+                    <div className="text-2xl font-bold text-white">{wallet?.total_coins || 0}</div>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Referral Code</span>
-                    <Badge variant="outline" className="font-mono">
+                  
+                  <div className="bg-white/15 backdrop-blur-sm rounded-lg p-4 text-center">
+                    <div className="flex items-center justify-center mb-2">
+                      <TrendingUp className="w-5 h-5 text-green-300 mr-2" />
+                      <span className="text-sm text-white/80">Rank</span>
+                    </div>
+                    <div className="text-2xl font-bold text-white">#42</div>
+                  </div>
+                </div>
+
+                <div className="bg-white/15 backdrop-blur-sm rounded-lg p-4 mb-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-white/80 text-sm">Referral Code</span>
+                    <Badge variant="outline" className="font-mono text-white border-white/30 bg-white/10">
                       {profile?.referral_code || 'Loading...'}
                     </Badge>
                   </div>
-                  <Button 
-                    className="w-full bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700"
-                    onClick={handleCopyReferralCode}
-                  >
-                    {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-                    {copied ? 'Copied!' : 'Copy Referral Code'}
-                  </Button>
                 </div>
+
+                <Button 
+                  className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm"
+                  onClick={handleCopyReferralCode}
+                >
+                  {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+                  {copied ? 'Copied!' : 'Copy Referral Code'}
+                </Button>
               </CardContent>
             </Card>
 
-            {/* Detailed Referral Program Card */}
-            <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-              <CardHeader>
-                <CardTitle className="text-xl text-green-700 flex items-center gap-2">
+            {/* Enhanced Stats Cards */}
+            <div className="grid grid-cols-2 gap-4">
+              <Card className="bg-gradient-to-br from-green-50 to-emerald-100 border-green-200">
+                <CardContent className="p-4 text-center">
+                  <div className="w-12 h-12 bg-green-500 rounded-full mx-auto mb-3 flex items-center justify-center">
+                    <Users className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="text-2xl font-bold text-green-700">12</div>
+                  <div className="text-sm text-green-600">Referrals</div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-blue-50 to-cyan-100 border-blue-200">
+                <CardContent className="p-4 text-center">
+                  <div className="w-12 h-12 bg-blue-500 rounded-full mx-auto mb-3 flex items-center justify-center">
+                    <Trophy className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="text-2xl font-bold text-blue-700">8</div>
+                  <div className="text-sm text-blue-600">Tasks Done</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Enhanced Referral Program Card */}
+            <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-t-lg">
+                <CardTitle className="text-xl flex items-center gap-2">
                   <Users className="w-6 h-6" />
                   Referral Program Details
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-white p-4 rounded-lg border border-green-200">
-                  <h3 className="font-semibold text-green-800 mb-2">How It Works:</h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-start gap-2">
-                      <span className="bg-green-100 text-green-700 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">1</span>
-                      <span>Share your referral code with friends</span>
+              <CardContent className="space-y-6 p-6">
+                <div className="bg-white p-5 rounded-xl border border-green-200 shadow-sm">
+                  <h3 className="font-bold text-green-800 mb-4 text-lg">🎯 How It Works:</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="bg-green-100 text-green-700 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">1</div>
+                      <div>
+                        <div className="font-semibold text-gray-800">Share your referral code</div>
+                        <div className="text-sm text-gray-600">Send your unique code to friends</div>
+                      </div>
                     </div>
-                    <div className="flex items-start gap-2">
-                      <span className="bg-green-100 text-green-700 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">2</span>
-                      <span>Friend joins GiftLeap using your code</span>
+                    <div className="flex items-start gap-3">
+                      <div className="bg-green-100 text-green-700 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">2</div>
+                      <div>
+                        <div className="font-semibold text-gray-800">Friend joins GiftLeap</div>
+                        <div className="text-sm text-gray-600">They sign up using your referral code</div>
+                      </div>
                     </div>
-                    <div className="flex items-start gap-2">
-                      <span className="bg-green-100 text-green-700 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">3</span>
-                      <span>When friend completes their first mining (100 coins), you both get rewarded!</span>
+                    <div className="flex items-start gap-3">
+                      <div className="bg-green-100 text-green-700 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">3</div>
+                      <div>
+                        <div className="font-semibold text-gray-800">Both get rewarded!</div>
+                        <div className="text-sm text-gray-600">When friend completes first mining (100 coins)</div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white p-3 rounded-lg border border-green-200 text-center">
-                    <div className="text-2xl font-bold text-green-600">100</div>
-                    <div className="text-sm text-gray-600">Coins for You</div>
+                  <div className="bg-gradient-to-br from-green-500 to-emerald-500 p-4 rounded-xl text-white text-center shadow-lg">
+                    <Coins className="w-8 h-8 mx-auto mb-2" />
+                    <div className="text-3xl font-bold">100</div>
+                    <div className="text-sm opacity-90">Coins for You</div>
                   </div>
-                  <div className="bg-white p-3 rounded-lg border border-green-200 text-center">
-                    <div className="text-2xl font-bold text-blue-600">500</div>
-                    <div className="text-sm text-gray-600">Welcome Bonus for Friend</div>
+                  <div className="bg-gradient-to-br from-blue-500 to-cyan-500 p-4 rounded-xl text-white text-center shadow-lg">
+                    <Gift className="w-8 h-8 mx-auto mb-2" />
+                    <div className="text-3xl font-bold">500</div>
+                    <div className="text-sm opacity-90">Welcome Bonus</div>
                   </div>
                 </div>
 
-                <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
-                  <h4 className="font-semibold text-yellow-800 mb-1">🎯 Pro Tips:</h4>
-                  <ul className="text-sm text-yellow-700 space-y-1">
-                    <li>• Unlimited referrals - no daily limits!</li>
-                    <li>• Bonus only applies when friend actively mines</li>
-                    <li>• Both accounts must be genuine (anti-fraud protection)</li>
-                    <li>• Track your referrals in the rewards section</li>
+                <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 rounded-xl border border-yellow-200">
+                  <h4 className="font-bold text-yellow-800 mb-2 flex items-center gap-2">
+                    🎯 Pro Tips:
+                  </h4>
+                  <ul className="text-sm text-yellow-700 space-y-2">
+                    <li className="flex items-start gap-2">
+                      <span className="text-yellow-500">•</span>
+                      <span>Unlimited referrals - no daily limits!</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-yellow-500">•</span>
+                      <span>Bonus only applies when friend actively mines</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-yellow-500">•</span>
+                      <span>Both accounts must be genuine (anti-fraud protection)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-yellow-500">•</span>
+                      <span>Track your referrals in the rewards section</span>
+                    </li>
                   </ul>
                 </div>
 
-                <div className="bg-purple-50 p-3 rounded-lg border border-purple-200 text-center">
+                <div className="bg-gradient-to-r from-purple-100 to-pink-100 p-4 rounded-xl border border-purple-200 text-center">
+                  <div className="text-lg font-bold text-purple-800 mb-1">💡 Quick Math:</div>
                   <p className="text-sm text-purple-700">
-                    <strong>Quick Math:</strong> 15 successful referrals = 1,500 coins = ₹50 Gift Card! 🎁
+                    <strong>15 successful referrals = 1,500 coins = ₹50 Gift Card! 🎁</strong>
                   </p>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="p-4 text-center">
+            {/* Sign Out Card */}
+            <Card className="border-gray-200">
+              <CardContent className="p-4">
                 <Button 
                   variant="outline" 
-                  className="w-full"
+                  className="w-full text-gray-700 border-gray-300 hover:bg-gray-50"
                   onClick={signOut}
                 >
                   <LogOut className="w-4 h-4 mr-2" />
