@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -28,16 +29,21 @@ const Index = () => {
   const [userLevel] = useState(5);
   const [loginStreak] = useState(3);
 
-  const tabConfig = [
+  // Reduced to 6 main tabs for bottom navigation
+  const mainTabConfig = [
     { id: 'home', label: 'Home', icon: Play, gradient: 'from-blue-500 to-purple-500' },
     { id: 'daily', label: 'Daily', icon: Calendar, gradient: 'from-blue-500 to-cyan-500' },
     { id: 'tasks', label: 'Tasks', icon: Trophy, gradient: 'from-orange-500 to-red-500' },
-    { id: 'quiz', label: 'Quiz', icon: BookOpen, gradient: 'from-green-500 to-emerald-500' },
     { id: 'spin', label: 'Spin', icon: Sparkles, gradient: 'from-purple-500 to-pink-500' },
-    { id: 'leaderboard', label: 'Rank', icon: TrendingUp, gradient: 'from-yellow-500 to-orange-500' },
-    { id: 'achievements', label: 'Awards', icon: Award, gradient: 'from-indigo-500 to-purple-500' },
     { id: 'rewards', label: 'Rewards', icon: Gift, gradient: 'from-pink-500 to-rose-500' },
     { id: 'profile', label: 'Profile', icon: Users, gradient: 'from-gray-500 to-slate-500' },
+  ];
+
+  // Additional features for home screen sections
+  const additionalFeatures = [
+    { id: 'quiz', label: 'Quiz Challenge', icon: BookOpen, gradient: 'from-green-500 to-emerald-500', description: 'Test your knowledge' },
+    { id: 'leaderboard', label: 'Leaderboard', icon: TrendingUp, gradient: 'from-yellow-500 to-orange-500', description: 'See your ranking' },
+    { id: 'achievements', label: 'Achievements', icon: Award, gradient: 'from-indigo-500 to-purple-500', description: 'Unlock badges' },
   ];
 
   const handleNavigateToQuiz = () => {
@@ -80,6 +86,17 @@ const Index = () => {
     });
   };
 
+  const handleFeatureNavigation = (featureId: string) => {
+    setActiveTab(featureId);
+    const feature = additionalFeatures.find(f => f.id === featureId);
+    if (feature) {
+      toast({
+        title: `🎯 ${feature.label}`,
+        description: feature.description,
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 flex items-center justify-center">
@@ -108,6 +125,42 @@ const Index = () => {
               onNavigateToDailyRewards={handleNavigateToDailyRewards}
             />
             <CoinWallet />
+            
+            {/* New More Features Section */}
+            <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200 shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <Star className="w-6 h-6 text-yellow-300" />
+                  More Features
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="grid grid-cols-1 gap-4">
+                  {additionalFeatures.map((feature) => {
+                    const Icon = feature.icon;
+                    return (
+                      <Button
+                        key={feature.id}
+                        variant="outline"
+                        className="h-auto p-4 flex items-center gap-4 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 border-2 hover:border-purple-300"
+                        onClick={() => handleFeatureNavigation(feature.id)}
+                      >
+                        <div className={`w-12 h-12 rounded-2xl bg-gradient-to-r ${feature.gradient} text-white flex items-center justify-center shadow-lg`}>
+                          <Icon className="w-6 h-6" />
+                        </div>
+                        <div className="flex-1 text-left">
+                          <div className="font-semibold text-lg text-gray-800">{feature.label}</div>
+                          <div className="text-sm text-gray-600">{feature.description}</div>
+                        </div>
+                        <div className="text-purple-500">
+                          <Sparkles className="w-5 h-5" />
+                        </div>
+                      </Button>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
           </div>
         );
       case 'daily':
@@ -296,37 +349,35 @@ const Index = () => {
         {renderContent()}
       </div>
 
-      {/* Enhanced Bottom Navigation - Now scrollable for more tabs */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200/50 px-1 py-2 shadow-2xl">
-        <div className="overflow-x-auto">
-          <div className="flex gap-1 min-w-max px-2">
-            {tabConfig.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`relative flex flex-col items-center py-2 px-3 rounded-2xl transition-all duration-300 transform min-w-[70px] ${
-                    isActive
-                      ? `bg-gradient-to-r ${tab.gradient} text-white shadow-lg scale-110 -translate-y-1`
-                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  {isActive && (
-                    <div className="absolute inset-0 bg-white/20 rounded-2xl animate-pulse"></div>
-                  )}
-                  <Icon className={`w-4 h-4 relative z-10 ${isActive ? 'animate-bounce' : ''}`} />
-                  <span className={`text-xs mt-1 font-medium relative z-10 ${isActive ? 'font-bold' : ''}`}>
-                    {tab.label}
-                  </span>
-                  {isActive && (
-                    <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-white rounded-full"></div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+      {/* Simplified Bottom Navigation - Only 6 tabs */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200/50 px-2 py-2 shadow-2xl">
+        <div className="flex justify-around">
+          {mainTabConfig.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`relative flex flex-col items-center py-2 px-3 rounded-2xl transition-all duration-300 transform min-w-[70px] ${
+                  isActive
+                    ? `bg-gradient-to-r ${tab.gradient} text-white shadow-lg scale-110 -translate-y-1`
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                {isActive && (
+                  <div className="absolute inset-0 bg-white/20 rounded-2xl animate-pulse"></div>
+                )}
+                <Icon className={`w-5 h-5 relative z-10 ${isActive ? 'animate-bounce' : ''}`} />
+                <span className={`text-xs mt-1 font-medium relative z-10 ${isActive ? 'font-bold' : ''}`}>
+                  {tab.label}
+                </span>
+                {isActive && (
+                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-white rounded-full"></div>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
