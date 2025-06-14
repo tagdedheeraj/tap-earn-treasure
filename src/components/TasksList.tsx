@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,13 +5,15 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle, Clock, Play, Trophy, Users, Calendar } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { useUserData } from '@/hooks/useUserData';
 
 interface TasksListProps {
   totalCoins: number;
   setTotalCoins: (coins: number) => void;
 }
 
-const TasksList: React.FC<TasksListProps> = ({ totalCoins, setTotalCoins }) => {
+const TasksList: React.FC = () => {
+  const { wallet, updateCoins } = useUserData();
   const [tasks, setTasks] = useState([
     {
       id: 1,
@@ -64,7 +65,7 @@ const TasksList: React.FC<TasksListProps> = ({ totalCoins, setTotalCoins }) => {
     },
   ]);
 
-  const completeTask = (taskId: number) => {
+  const completeTask = async (taskId: number) => {
     setTasks(prevTasks => 
       prevTasks.map(task => {
         if (task.id === taskId && !task.completed) {
@@ -72,7 +73,7 @@ const TasksList: React.FC<TasksListProps> = ({ totalCoins, setTotalCoins }) => {
           const isCompleted = newProgress >= task.total;
           
           if (isCompleted) {
-            setTotalCoins(totalCoins + task.reward);
+            updateCoins(task.reward, 'task', `Task completion: ${task.title}`);
             toast({
               title: "Task Completed! 🎉",
               description: `You earned ${task.reward} coins!`,

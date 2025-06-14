@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,13 +5,15 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { BookOpen, Clock, CheckCircle, XCircle, Trophy } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { useUserData } from '@/hooks/useUserData';
 
 interface QuizSectionProps {
   totalCoins: number;
   setTotalCoins: (coins: number) => void;
 }
 
-const QuizSection: React.FC<QuizSectionProps> = ({ totalCoins, setTotalCoins }) => {
+const QuizSection: React.FC = () => {
+  const { wallet, updateCoins } = useUserData();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [score, setScore] = useState(0);
@@ -95,15 +96,24 @@ const QuizSection: React.FC<QuizSectionProps> = ({ totalCoins, setTotalCoins }) 
     }
   };
 
-  const finishQuiz = () => {
+  const finishQuiz = async () => {
     setShowResult(true);
     const coinsEarned = score * 5; // 5 coins per correct answer
-    setTotalCoins(totalCoins + coinsEarned);
     
-    toast({
-      title: "Quiz Completed! 🎉",
-      description: `You scored ${score}/${questions.length} and earned ${coinsEarned} coins!`,
-    });
+    try {
+      await updateCoins(coinsEarned, 'quiz', `Daily quiz completed: ${score}/${questions.length} correct`);
+      toast({
+        title: "Quiz Completed! 🎉",
+        description: `You scored ${score}/${questions.length} and earned ${coinsEarned} coins!`,
+      });
+    } catch (error) {
+      console.error('Error updating coins:', error);
+      toast({
+        title: "Quiz Completed!",
+        description: `You scored ${score}/${questions.length}. There was an issue saving your coins.`,
+        variant: "destructive",
+      });
+    }
   };
 
   if (!quizStarted) {

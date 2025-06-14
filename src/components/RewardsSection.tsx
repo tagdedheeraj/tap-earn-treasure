@@ -1,17 +1,13 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Gift, Star, Lock, ShoppingCart, CreditCard } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { useUserData } from '@/hooks/useUserData';
 
-interface RewardsSectionProps {
-  totalCoins: number;
-  setTotalCoins: (coins: number) => void;
-}
-
-const RewardsSection: React.FC<RewardsSectionProps> = ({ totalCoins, setTotalCoins }) => {
+const RewardsSection: React.FC = () => {
+  const { wallet, updateCoins } = useUserData();
   const [redemptions, setRedemptions] = useState([
     { id: 1, item: 'Amazon Gift Card', amount: '$5', status: 'pending', date: '2024-01-15' },
     { id: 2, item: 'Google Play Card', amount: '$10', status: 'approved', date: '2024-01-10' },
@@ -77,7 +73,9 @@ const RewardsSection: React.FC<RewardsSectionProps> = ({ totalCoins, setTotalCoi
   const [selectedCategory, setSelectedCategory] = useState('All');
   const categories = ['All', 'Gift Cards', 'Cash', 'Gaming', 'Subscriptions'];
 
-  const handleRedeem = (reward: typeof rewards[0]) => {
+  const handleRedeem = async (reward: typeof rewards[0]) => {
+    const totalCoins = wallet?.total_coins || 0;
+    
     if (totalCoins < reward.cost) {
       toast({
         title: "Insufficient Coins",
@@ -87,25 +85,37 @@ const RewardsSection: React.FC<RewardsSectionProps> = ({ totalCoins, setTotalCoi
       return;
     }
 
-    setTotalCoins(totalCoins - reward.cost);
-    const newRedemption = {
-      id: redemptions.length + 1,
-      item: reward.name,
-      amount: reward.description,
-      status: 'pending',
-      date: new Date().toISOString().split('T')[0],
-    };
-    setRedemptions([newRedemption, ...redemptions]);
+    try {
+      await updateCoins(-reward.cost, 'redemption', `Redeemed ${reward.name}`);
+      
+      const newRedemption = {
+        id: redemptions.length + 1,
+        item: reward.name,
+        amount: reward.description,
+        status: 'pending',
+        date: new Date().toISOString().split('T')[0],
+      };
+      setRedemptions([newRedemption, ...redemptions]);
 
-    toast({
-      title: "Redemption Successful! 🎉",
-      description: `Your ${reward.name} request is being processed. Check your email for updates.`,
-    });
+      toast({
+        title: "Redemption Successful! 🎉",
+        description: `Your ${reward.name} request is being processed. Check your email for updates.`,
+      });
+    } catch (error) {
+      console.error('Error processing redemption:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process redemption. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const filteredRewards = selectedCategory === 'All' 
     ? rewards 
     : rewards.filter(reward => reward.category === selectedCategory);
+
+  const totalCoins = wallet?.total_coins || 0;
 
   return (
     <div className="space-y-6">

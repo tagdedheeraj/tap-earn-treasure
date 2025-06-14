@@ -10,7 +10,7 @@ import { useUserData } from '@/hooks/useUserData';
 interface Transaction {
   id: string;
   amount: number;
-  transaction_type: 'earned' | 'spent';
+  transaction_type: string; // Changed from 'earned' | 'spent' to string
   source: string;
   description: string | null;
   created_at: string;

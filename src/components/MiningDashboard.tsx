@@ -6,13 +6,13 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Pickaxe, Clock, Coins, Zap } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { useUserData } from '@/hooks/useUserData';
+import { supabase } from '@/integrations/supabase/client';
 
-interface MiningDashboardProps {
-  totalCoins: number;
-  setTotalCoins: (coins: number) => void;
-}
-
-const MiningDashboard: React.FC<MiningDashboardProps> = ({ totalCoins, setTotalCoins }) => {
+const MiningDashboard: React.FC = () => {
+  const { user } = useAuth();
+  const { wallet, updateCoins, refetchData } = useUserData();
   const [isMining, setIsMining] = useState(false);
   const [miningProgress, setMiningProgress] = useState(0);
   const [canMine, setCanMine] = useState(true);
@@ -87,18 +87,31 @@ const MiningDashboard: React.FC<MiningDashboardProps> = ({ totalCoins, setTotalC
     }, 200); // Fast for demo, in real app this would be much slower
   };
 
-  const completeMining = (coins: number) => {
-    setTotalCoins(totalCoins + coins);
-    setCanMine(false);
-    setTimeUntilNextMining(24);
-    localStorage.setItem('lastMiningTime', Date.now().toString());
-    localStorage.removeItem('miningProgress');
-    localStorage.removeItem('minedCoins');
+  const completeMining = async (coins: number) => {
+    if (!user) return;
     
-    toast({
-      title: "Mining Complete! 🎉",
-      description: `You earned ${coins} coins! Come back in 24 hours to mine again.`,
-    });
+    try {
+      // Update coins in database
+      await updateCoins(coins, 'mining', 'Daily mining reward');
+      
+      setCanMine(false);
+      setTimeUntilNextMining(24);
+      localStorage.setItem('lastMiningTime', Date.now().toString());
+      localStorage.removeItem('miningProgress');
+      localStorage.removeItem('minedCoins');
+      
+      toast({
+        title: "Mining Complete! 🎉",
+        description: `You earned ${coins} coins! Come back in 24 hours to mine again.`,
+      });
+    } catch (error) {
+      console.error('Error completing mining:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save mining reward. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const collectMining = () => {
