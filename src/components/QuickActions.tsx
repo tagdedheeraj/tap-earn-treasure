@@ -4,8 +4,55 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Play, Trophy, BookOpen, Gift } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
-const QuickActions = () => {
+interface QuickActionsProps {
+  onNavigateToQuiz?: () => void;
+  onNavigateToTasks?: () => void;
+  onNavigateToRewards?: () => void;
+}
+
+const QuickActions = ({ onNavigateToQuiz, onNavigateToTasks, onNavigateToRewards }: QuickActionsProps) => {
+  const handleWatchAd = () => {
+    toast({
+      title: "📺 Watch Ad",
+      description: "Ad feature coming soon! Earn 5 points by watching video ads.",
+    });
+  };
+
+  const handleDailyTasks = () => {
+    if (onNavigateToTasks) {
+      onNavigateToTasks();
+    } else {
+      toast({
+        title: "📋 Daily Tasks",
+        description: "Navigate to tasks section to complete pending tasks!",
+      });
+    }
+  };
+
+  const handleDailyQuiz = () => {
+    if (onNavigateToQuiz) {
+      onNavigateToQuiz();
+    } else {
+      toast({
+        title: "🧠 Daily Quiz",
+        description: "Navigate to quiz section to answer questions!",
+      });
+    }
+  };
+
+  const handleOffers = () => {
+    if (onNavigateToRewards) {
+      onNavigateToRewards();
+    } else {
+      toast({
+        title: "🎁 Special Offers",
+        description: "Check rewards section for new offers and deals!",
+      });
+    }
+  };
+
   const actions = [
     {
       icon: Play,
@@ -13,6 +60,7 @@ const QuickActions = () => {
       reward: '+5 points',
       color: 'bg-green-500',
       available: 8,
+      onClick: handleWatchAd,
     },
     {
       icon: Trophy,
@@ -20,6 +68,7 @@ const QuickActions = () => {
       reward: '3 pending',
       color: 'bg-orange-500',
       available: null,
+      onClick: handleDailyTasks,
     },
     {
       icon: BookOpen,
@@ -27,6 +76,7 @@ const QuickActions = () => {
       reward: 'Ready',
       color: 'bg-blue-500',
       available: null,
+      onClick: handleDailyQuiz,
     },
     {
       icon: Gift,
@@ -34,6 +84,7 @@ const QuickActions = () => {
       reward: 'New offers',
       color: 'bg-purple-500',
       available: null,
+      onClick: handleOffers,
     },
   ];
 
@@ -49,6 +100,7 @@ const QuickActions = () => {
                 key={index}
                 variant="outline"
                 className="h-auto p-4 flex flex-col gap-2 hover:shadow-md transition-shadow"
+                onClick={action.onClick}
               >
                 <div className={`w-8 h-8 rounded-full ${action.color} text-white flex items-center justify-center`}>
                   <Icon className="w-4 h-4" />

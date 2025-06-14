@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -41,6 +40,22 @@ const Index = () => {
     });
   };
 
+  const handleNavigateToTasks = () => {
+    setActiveTab('tasks');
+    toast({
+      title: "📋 Daily Tasks",
+      description: "Complete tasks to earn coins and rewards!",
+    });
+  };
+
+  const handleNavigateToRewards = () => {
+    setActiveTab('rewards');
+    toast({
+      title: "🎁 Rewards",
+      description: "Check out available rewards and offers!",
+    });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 flex items-center justify-center">
@@ -61,7 +76,11 @@ const Index = () => {
         return (
           <div className="space-y-6">
             <MiningDashboard />
-            <QuickActions />
+            <QuickActions 
+              onNavigateToQuiz={handleNavigateToQuiz}
+              onNavigateToTasks={handleNavigateToTasks}
+              onNavigateToRewards={handleNavigateToRewards}
+            />
             <CoinWallet />
           </div>
         );
