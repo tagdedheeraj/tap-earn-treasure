@@ -7,17 +7,9 @@ import { Bell, BellRing, X, Coins, Trophy, BookOpen, Users, Gift } from 'lucide-
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { Tables } from '@/integrations/supabase/types';
 
-interface Notification {
-  id: string;
-  user_id: string;
-  type: string;
-  title: string;
-  message: string;
-  is_read: boolean;
-  created_at: string;
-  data?: any;
-}
+type Notification = Tables<'notifications'>;
 
 const NotificationCenter = () => {
   const { user } = useAuth();
@@ -47,7 +39,7 @@ const NotificationCenter = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('notifications' as any)
+        .from('notifications')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
@@ -58,9 +50,8 @@ const NotificationCenter = () => {
         return;
       }
       
-      const typedData = data as Notification[];
-      setNotifications(typedData || []);
-      setUnreadCount(typedData?.filter(n => !n.is_read).length || 0);
+      setNotifications(data || []);
+      setUnreadCount(data?.filter(n => !n.is_read).length || 0);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {
@@ -99,7 +90,7 @@ const NotificationCenter = () => {
   const markAsRead = async (notificationId: string) => {
     try {
       const { error } = await supabase
-        .from('notifications' as any)
+        .from('notifications')
         .update({ is_read: true })
         .eq('id', notificationId);
 
@@ -124,7 +115,7 @@ const NotificationCenter = () => {
 
     try {
       const { error } = await supabase
-        .from('notifications' as any)
+        .from('notifications')
         .update({ is_read: true })
         .eq('user_id', user.id)
         .eq('is_read', false);

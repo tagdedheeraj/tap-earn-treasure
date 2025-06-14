@@ -15,7 +15,7 @@ export const useNotifications = () => {
 
     try {
       const { error } = await supabase
-        .from('notifications' as any)
+        .from('notifications')
         .insert({
           user_id: user.id,
           type,
