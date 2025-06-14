@@ -27,6 +27,12 @@ const Auth = () => {
     if (user) {
       window.location.href = '/';
     }
+    
+    // Check for stored referral code
+    const storedReferralCode = localStorage.getItem('referralCode');
+    if (storedReferralCode) {
+      setReferralCode(storedReferralCode);
+    }
   }, [user]);
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -36,9 +42,16 @@ const Auth = () => {
     try {
       console.log('Starting signup process for:', signUpEmail);
       
+      // Create account
       const { data, error } = await supabase.auth.signUp({
         email: signUpEmail,
         password: signUpPassword,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            referral_code: referralCode.trim()
+          }
+        }
       });
 
       if (error) {
@@ -72,10 +85,11 @@ const Auth = () => {
           description: "Welcome to CoinMiner Pro! You can now start earning coins.",
         });
 
-        // Clear form
+        // Clear form and referral code from storage
         setSignUpEmail('');
         setSignUpPassword('');
         setReferralCode('');
+        localStorage.removeItem('referralCode');
         
         // Redirect to main page
         setTimeout(() => {
@@ -231,7 +245,7 @@ const Auth = () => {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="referral-code">Referral Code (Optional)</Label>
+                    <Label htmlFor="referral-code">Referral Code {referralCode && '(Auto-filled)'}</Label>
                     <div className="relative">
                       <Gift className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                       <Input

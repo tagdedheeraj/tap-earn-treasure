@@ -1,13 +1,17 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Gift, Star, Lock, ShoppingCart, CreditCard } from 'lucide-react';
+import { Gift, Star, Lock, ShoppingCart, CreditCard, Smartphone } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useUserData } from '@/hooks/useUserData';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
+import { Link } from 'react-router-dom';
 
 const RewardsSection: React.FC = () => {
   const { wallet, updateCoins } = useUserData();
+  const { requireAuth, AuthDialog } = useRequireAuth();
   const [redemptions, setRedemptions] = useState([
     { id: 1, item: 'Amazon Gift Card', amount: '$5', status: 'pending', date: '2024-01-15' },
     { id: 2, item: 'Google Play Card', amount: '$10', status: 'approved', date: '2024-01-10' },
@@ -74,41 +78,45 @@ const RewardsSection: React.FC = () => {
   const categories = ['All', 'Gift Cards', 'Cash', 'Gaming', 'Subscriptions'];
 
   const handleRedeem = async (reward: typeof rewards[0]) => {
-    const totalCoins = wallet?.total_coins || 0;
-    
-    if (totalCoins < reward.cost) {
-      toast({
-        title: "Insufficient Coins",
-        description: `You need ${reward.cost - totalCoins} more coins to redeem this reward.`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      await updateCoins(-reward.cost, 'redemption', `Redeemed ${reward.name}`);
+    const redeemAction = async () => {
+      const totalCoins = wallet?.total_coins || 0;
       
-      const newRedemption = {
-        id: redemptions.length + 1,
-        item: reward.name,
-        amount: reward.description,
-        status: 'pending',
-        date: new Date().toISOString().split('T')[0],
-      };
-      setRedemptions([newRedemption, ...redemptions]);
+      if (totalCoins < reward.cost) {
+        toast({
+          title: "Insufficient Coins",
+          description: `You need ${reward.cost - totalCoins} more coins to redeem this reward.`,
+          variant: "destructive",
+        });
+        return;
+      }
 
-      toast({
-        title: "Redemption Successful! 🎉",
-        description: `Your ${reward.name} request is being processed. Check your email for updates.`,
-      });
-    } catch (error) {
-      console.error('Error processing redemption:', error);
-      toast({
-        title: "Error",
-        description: "Failed to process redemption. Please try again.",
-        variant: "destructive",
-      });
-    }
+      try {
+        await updateCoins(-reward.cost, 'redemption', `Redeemed ${reward.name}`);
+        
+        const newRedemption = {
+          id: redemptions.length + 1,
+          item: reward.name,
+          amount: reward.description,
+          status: 'pending',
+          date: new Date().toISOString().split('T')[0],
+        };
+        setRedemptions([newRedemption, ...redemptions]);
+
+        toast({
+          title: "Redemption Successful! 🎉",
+          description: `Your ${reward.name} request is being processed. Check your email for updates.`,
+        });
+      } catch (error) {
+        console.error('Error processing redemption:', error);
+        toast({
+          title: "Error",
+          description: "Failed to process redemption. Please try again.",
+          variant: "destructive",
+        });
+      }
+    };
+    
+    requireAuth(redeemAction);
   };
 
   const filteredRewards = selectedCategory === 'All' 
@@ -139,6 +147,13 @@ const RewardsSection: React.FC = () => {
               <p className="text-sm text-gray-600">Total Redeemed</p>
             </div>
           </div>
+          
+          <Link to="/gadgets">
+            <Button className="w-full mt-4 bg-gradient-to-r from-indigo-500 to-purple-600">
+              <Smartphone className="w-4 h-4 mr-2" />
+              Browse Gadget Store
+            </Button>
+          </Link>
         </CardContent>
       </Card>
 
@@ -239,6 +254,7 @@ const RewardsSection: React.FC = () => {
           )}
         </CardContent>
       </Card>
+      <AuthDialog />
     </div>
   );
 };

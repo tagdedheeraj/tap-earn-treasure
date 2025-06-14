@@ -1,6 +1,4 @@
-
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Coins, Play, Trophy, Gift, Users, BookOpen, LogOut } from 'lucide-react';
@@ -12,6 +10,9 @@ import QuizSection from '@/components/QuizSection';
 import RewardsSection from '@/components/RewardsSection';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserData } from '@/hooks/useUserData';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
+import { useNavigate } from 'react-router-dom';
+import { toast } from '@/hooks/use-toast';
 
 const Index = () => {
   const { signOut } = useAuth();

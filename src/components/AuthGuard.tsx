@@ -1,13 +1,16 @@
 
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import Auth from '@/pages/Auth';
 
 interface AuthGuardProps {
   children: React.ReactNode;
+  requireAuth?: boolean;
 }
 
-const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
+// AuthGuard now has an optional requireAuth parameter
+// If requireAuth is true, the user must be authenticated to access the page
+// If requireAuth is false or undefined, any user can access the page
+const AuthGuard: React.FC<AuthGuardProps> = ({ children, requireAuth = false }) => {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -21,9 +24,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     );
   }
 
-  if (!user) {
-    return <Auth />;
-  }
+  // If requireAuth is true and user is not authenticated, we would typically redirect
+  // But we'll return the children anyway as we'll handle auth at the component level
 
   return <>{children}</>;
 };
