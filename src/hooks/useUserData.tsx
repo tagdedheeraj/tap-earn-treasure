@@ -99,8 +99,10 @@ export const useUserData = () => {
           .limit(2); // Check for 2 to see if this is the first
 
         if (transactions && transactions.length === 1) {
-          // This is the first mining - complete referral if exists
-          await completeReferralBonus(user.id);
+          // This is the first mining - check if user was referred and award bonus
+          if (profile?.referred_by) {
+            await awardReferralBonus(profile.referred_by);
+          }
         }
       }
 
@@ -111,59 +113,66 @@ export const useUserData = () => {
     }
   };
 
-  const completeReferralBonus = async (referredUserId: string) => {
+  const awardReferralBonus = async (referrerId: string) => {
     try {
-      // Get pending referral
-      const { data: pendingReferral, error: fetchError } = await supabase
-        .from('pending_referrals')
-        .select('*')
-        .eq('referred_user_id', referredUserId)
-        .eq('status', 'pending')
+      // Award 100 points to referrer
+      const { error: updateWalletError } = await supabase
+        .from('coin_wallets')
+        .select('total_coins')
+        .eq('user_id', referrerId)
         .single();
 
-      if (fetchError || !pendingReferral) {
-        console.log('No pending referral found or error:', fetchError);
+      if (updateWalletError) {
+        console.error('Error fetching referrer wallet:', updateWalletError);
         return;
       }
 
-      // Award points to referrer
-      const { error: updateWalletError } = await supabase
+      // Update referrer's wallet
+      const { error: walletUpdateError } = await supabase
         .from('coin_wallets')
         .update({
-          total_coins: supabase.sql`total_coins + ${pendingReferral.referral_reward}`,
+          total_coins: supabase.sql`total_coins + 100`,
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', pendingReferral.referrer_id);
+        .eq('user_id', referrerId);
 
-      if (updateWalletError) throw updateWalletError;
+      if (walletUpdateError) {
+        // Fallback: Get current balance and add points
+        const { data: currentWallet } = await supabase
+          .from('coin_wallets')
+          .select('total_coins')
+          .eq('user_id', referrerId)
+          .single();
+
+        if (currentWallet) {
+          await supabase
+            .from('coin_wallets')
+            .update({
+              total_coins: currentWallet.total_coins + 100,
+              updated_at: new Date().toISOString()
+            })
+            .eq('user_id', referrerId);
+        }
+      }
 
       // Record referrer transaction
       const { error: transactionError } = await supabase
         .from('coin_transactions')
         .insert({
-          user_id: pendingReferral.referrer_id,
-          amount: pendingReferral.referral_reward,
+          user_id: referrerId,
+          amount: 100,
           transaction_type: 'earned',
           source: 'referral',
           description: 'Referral bonus - friend completed first mining'
         });
 
-      if (transactionError) throw transactionError;
+      if (transactionError) {
+        console.error('Error creating referral transaction:', transactionError);
+      }
 
-      // Mark referral as completed
-      const { error: completeError } = await supabase
-        .from('pending_referrals')
-        .update({
-          status: 'completed',
-          completed_at: new Date().toISOString()
-        })
-        .eq('id', pendingReferral.id);
-
-      if (completeError) throw completeError;
-
-      console.log('Referral bonus completed successfully');
+      console.log('Referral bonus awarded successfully');
     } catch (error) {
-      console.error('Error completing referral bonus:', error);
+      console.error('Error awarding referral bonus:', error);
     }
   };
 
