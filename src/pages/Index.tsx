@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +11,7 @@ import TasksList from '@/components/TasksList';
 import QuizSection from '@/components/QuizSection';
 import RewardsSection from '@/components/RewardsSection';
 import ProfileHeader from '@/components/ProfileHeader';
+import NotificationCenter from '@/components/NotificationCenter';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserData } from '@/hooks/useUserData';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
@@ -121,7 +123,7 @@ const Index = () => {
                       <div className="bg-green-100 text-green-700 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0">3</div>
                       <div>
                         <div className="font-semibold text-gray-800">Both get rewarded!</div>
-                        <div className="text-sm text-gray-600">When friend completes first mining (100 coins)</div>
+                        <div className="text-sm text-gray-600">When friend completes first mining (100 points)</div>
                       </div>
                     </div>
                   </div>
@@ -131,7 +133,7 @@ const Index = () => {
                   <div className="bg-gradient-to-br from-green-500 to-emerald-500 p-4 rounded-xl text-white text-center shadow-lg">
                     <Coins className="w-8 h-8 mx-auto mb-2" />
                     <div className="text-3xl font-bold">100</div>
-                    <div className="text-sm opacity-90">Coins for You</div>
+                    <div className="text-sm opacity-90">Points for You</div>
                   </div>
                   <div className="bg-gradient-to-br from-blue-500 to-cyan-500 p-4 rounded-xl text-white text-center shadow-lg">
                     <Gift className="w-8 h-8 mx-auto mb-2" />
@@ -167,7 +169,7 @@ const Index = () => {
                 <div className="bg-gradient-to-r from-purple-100 to-pink-100 p-4 rounded-xl border border-purple-200 text-center">
                   <div className="text-lg font-bold text-purple-800 mb-1">💡 Quick Math:</div>
                   <p className="text-sm text-purple-700">
-                    <strong>15 successful referrals = 1,500 coins = ₹50 Gift Card! 🎁</strong>
+                    <strong>15 successful referrals = 1,500 points = ₹50 Gift Card! 🎁</strong>
                   </p>
                 </div>
               </CardContent>
@@ -202,9 +204,12 @@ const Index = () => {
             <h1 className="text-xl font-bold">GiftLeap</h1>
             <p className="text-purple-100 text-sm">Earn. Leap. Redeem.</p>
           </div>
-          <div className="flex items-center gap-2 bg-white/20 rounded-full px-3 py-1">
-            <Coins className="w-5 h-5 text-yellow-300" />
-            <span className="font-bold text-lg">{wallet?.total_coins || 0}</span>
+          <div className="flex items-center gap-3">
+            <NotificationCenter />
+            <div className="flex items-center gap-2 bg-white/20 rounded-full px-3 py-1">
+              <Coins className="w-5 h-5 text-yellow-300" />
+              <span className="font-bold text-lg">{wallet?.total_coins || 0}</span>
+            </div>
           </div>
         </div>
       </div>
