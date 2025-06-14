@@ -1,23 +1,24 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Coins, Play, Trophy, Gift, Users, BookOpen, Star } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { Coins, Play, Trophy, Gift, Users, BookOpen, LogOut } from 'lucide-react';
 import MiningDashboard from '@/components/MiningDashboard';
 import QuickActions from '@/components/QuickActions';
 import CoinWallet from '@/components/CoinWallet';
 import TasksList from '@/components/TasksList';
 import QuizSection from '@/components/QuizSection';
 import RewardsSection from '@/components/RewardsSection';
+import { useAuth } from '@/hooks/useAuth';
+import { useUserData } from '@/hooks/useUserData';
 
 const Index = () => {
-  const [totalCoins, setTotalCoins] = useState(1250);
+  const { signOut } = useAuth();
+  const { profile, wallet, loading } = useUserData();
   const [activeTab, setActiveTab] = useState('home');
-  const [userLevel, setUserLevel] = useState(5);
-  const [loginStreak, setLoginStreak] = useState(3);
+  const [userLevel] = useState(5);
+  const [loginStreak] = useState(3);
 
   const tabConfig = [
     { id: 'home', label: 'Home', icon: Play },
@@ -27,31 +28,44 @@ const Index = () => {
     { id: 'profile', label: 'Profile', icon: Users },
   ];
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your profile...</p>
+        </div>
+      </div>
+    );
+  }
+
   const renderContent = () => {
     switch (activeTab) {
       case 'home':
         return (
           <div className="space-y-6">
-            <MiningDashboard totalCoins={totalCoins} setTotalCoins={setTotalCoins} />
+            <MiningDashboard />
             <QuickActions />
-            <CoinWallet totalCoins={totalCoins} />
+            <CoinWallet />
           </div>
         );
       case 'tasks':
-        return <TasksList totalCoins={totalCoins} setTotalCoins={setTotalCoins} />;
+        return <TasksList />;
       case 'quiz':
-        return <QuizSection totalCoins={totalCoins} setTotalCoins={setTotalCoins} />;
+        return <QuizSection />;
       case 'rewards':
-        return <RewardsSection totalCoins={totalCoins} setTotalCoins={setTotalCoins} />;
+        return <RewardsSection />;
       case 'profile':
         return (
           <div className="space-y-6">
             <Card className="bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200">
               <CardHeader className="text-center">
                 <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full mx-auto flex items-center justify-center text-white text-2xl font-bold">
-                  U
+                  {profile?.username?.[0]?.toUpperCase() || 'U'}
                 </div>
-                <CardTitle className="text-2xl">User Profile</CardTitle>
+                <CardTitle className="text-2xl">
+                  {profile?.username || 'User Profile'}
+                </CardTitle>
                 <div className="flex justify-center gap-4 mt-4">
                   <Badge variant="secondary" className="bg-purple-100 text-purple-700">
                     Level {userLevel}
@@ -64,16 +78,34 @@ const Index = () => {
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Total Coins Earned</span>
-                    <span className="font-bold text-lg">{totalCoins + 5000}</span>
+                    <span className="text-gray-600">Total Coins</span>
+                    <span className="font-bold text-lg">{wallet?.total_coins || 0}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Referral Code</span>
-                    <Badge variant="outline" className="font-mono">REWARD123</Badge>
+                    <Badge variant="outline" className="font-mono">
+                      {profile?.referral_code || 'Loading...'}
+                    </Badge>
                   </div>
-                  <Button className="w-full bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700">
+                  <Button 
+                    className="w-full bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700"
+                    onClick={() => {
+                      if (profile?.referral_code) {
+                        navigator.clipboard.writeText(profile.referral_code);
+                        // Could add toast here
+                      }
+                    }}
+                  >
                     <Users className="w-4 h-4 mr-2" />
-                    Share Referral Code
+                    Share Referral Code (1000 coins per referral!)
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={signOut}
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
                   </Button>
                 </div>
               </CardContent>
@@ -96,7 +128,7 @@ const Index = () => {
           </div>
           <div className="flex items-center gap-2 bg-white/20 rounded-full px-3 py-1">
             <Coins className="w-5 h-5 text-yellow-300" />
-            <span className="font-bold text-lg">{totalCoins}</span>
+            <span className="font-bold text-lg">{wallet?.total_coins || 0}</span>
           </div>
         </div>
       </div>
