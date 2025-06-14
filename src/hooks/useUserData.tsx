@@ -115,44 +115,30 @@ export const useUserData = () => {
 
   const awardReferralBonus = async (referrerId: string) => {
     try {
-      // Award 100 points to referrer
-      const { error: updateWalletError } = await supabase
+      // Get current referrer wallet balance
+      const { data: currentWallet, error: fetchError } = await supabase
         .from('coin_wallets')
         .select('total_coins')
         .eq('user_id', referrerId)
         .single();
 
-      if (updateWalletError) {
-        console.error('Error fetching referrer wallet:', updateWalletError);
+      if (fetchError) {
+        console.error('Error fetching referrer wallet:', fetchError);
         return;
       }
 
-      // Update referrer's wallet
+      // Update referrer's wallet with 100 bonus points
       const { error: walletUpdateError } = await supabase
         .from('coin_wallets')
         .update({
-          total_coins: supabase.sql`total_coins + 100`,
+          total_coins: currentWallet.total_coins + 100,
           updated_at: new Date().toISOString()
         })
         .eq('user_id', referrerId);
 
       if (walletUpdateError) {
-        // Fallback: Get current balance and add points
-        const { data: currentWallet } = await supabase
-          .from('coin_wallets')
-          .select('total_coins')
-          .eq('user_id', referrerId)
-          .single();
-
-        if (currentWallet) {
-          await supabase
-            .from('coin_wallets')
-            .update({
-              total_coins: currentWallet.total_coins + 100,
-              updated_at: new Date().toISOString()
-            })
-            .eq('user_id', referrerId);
-        }
+        console.error('Error updating referrer wallet:', walletUpdateError);
+        return;
       }
 
       // Record referrer transaction
