@@ -36,13 +36,11 @@ const GadgetsPage: React.FC = () => {
   const fetchGadgets = async () => {
     setLoading(true);
     try {
-      // Use raw query to access gadgets table
-      const { data, error } = await supabase.rpc('execute_sql', {
-        query: 'SELECT * FROM gadgets ORDER BY coin_cost ASC'
-      }).catch(async () => {
-        // Fallback: return empty array if gadgets table doesn't exist
-        return { data: [], error: null };
-      });
+      // Try to fetch from gadgets table
+      const { data, error } = await supabase
+        .from('gadgets')
+        .select('*')
+        .order('coin_cost', { ascending: true });
 
       if (error) {
         console.warn('Gadgets table not yet available:', error);

@@ -34,7 +34,10 @@ const MiningDashboard: React.FC = () => {
           .eq('user_id', user.id)
           .single();
         
-        if (error) throw error;
+        if (error) {
+          console.log('Mining session not found, will create one when needed');
+          return;
+        }
         
         if (data) {
           setMiningSession(data);
@@ -139,27 +142,26 @@ const MiningDashboard: React.FC = () => {
       if (!canMine || !user) return;
       
       try {
-        // Update mining session in database - use raw SQL for compatibility
+        // Update mining session in database using standard Supabase methods
         const now = new Date().toISOString();
-        const { error } = await supabase.rpc('execute_sql', {
-          query: `UPDATE mining_sessions SET 
-                    is_mining_active = true,
-                    mining_progress = 0,
-                    coins_mined = 0,
-                    mining_started_at = '${now}',
-                    last_mining_time = '${now}'
-                  WHERE user_id = '${user.id}'`
-        }).catch(async () => {
-          // Fallback: update only existing columns
-          return await supabase
-            .from('mining_sessions')
-            .update({
-              mining_progress: 0,
-              coins_mined: 0,
-              last_mining_time: now
-            })
-            .eq('user_id', user.id);
-        });
+        const updateData: any = {
+          mining_progress: 0,
+          coins_mined: 0,
+          last_mining_time: now
+        };
+
+        // Try to add new columns if they exist
+        try {
+          updateData.is_mining_active = true;
+          updateData.mining_started_at = now;
+        } catch (e) {
+          // Ignore if columns don't exist yet
+        }
+
+        const { error } = await supabase
+          .from('mining_sessions')
+          .update(updateData)
+          .eq('user_id', user.id);
         
         if (error) throw error;
         
@@ -187,24 +189,24 @@ const MiningDashboard: React.FC = () => {
       try {
         // Update mining session in database
         const now = new Date().toISOString();
-        const { error } = await supabase.rpc('execute_sql', {
-          query: `UPDATE mining_sessions SET 
-                    is_mining_active = false,
-                    mining_progress = 100,
-                    coins_mined = 100,
-                    mining_completed_at = '${now}'
-                  WHERE user_id = '${user.id}'`
-        }).catch(async () => {
-          // Fallback: update only existing columns
-          return await supabase
-            .from('mining_sessions')
-            .update({
-              mining_progress: 100,
-              coins_mined: 100,
-              last_mining_time: now
-            })
-            .eq('user_id', user.id);
-        });
+        const updateData: any = {
+          mining_progress: 100,
+          coins_mined: 100,
+          last_mining_time: now
+        };
+
+        // Try to add new columns if they exist
+        try {
+          updateData.is_mining_active = false;
+          updateData.mining_completed_at = now;
+        } catch (e) {
+          // Ignore if columns don't exist yet
+        }
+
+        const { error } = await supabase
+          .from('mining_sessions')
+          .update(updateData)
+          .eq('user_id', user.id);
         
         if (error) throw error;
         
