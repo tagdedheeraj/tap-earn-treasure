@@ -107,23 +107,32 @@ export const useUserData = () => {
 
           if (transactions && transactions.length === 1) {
             // This is the first mining - give referrer bonus
-            await supabase
+            // First get the current coins
+            const { data: referrerWallet } = await supabase
               .from('coin_wallets')
-              .update({ 
-                total_coins: supabase.raw('total_coins + 100'),
-                updated_at: new Date().toISOString()
-              })
-              .eq('user_id', profile.referred_by);
+              .select('total_coins')
+              .eq('user_id', profile.referred_by)
+              .single();
 
-            await supabase
-              .from('coin_transactions')
-              .insert({
-                user_id: profile.referred_by,
-                amount: 100,
-                transaction_type: 'earned',
-                source: 'referral',
-                description: 'Referral bonus - friend completed first mining'
-              });
+            if (referrerWallet) {
+              await supabase
+                .from('coin_wallets')
+                .update({ 
+                  total_coins: referrerWallet.total_coins + 100,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('user_id', profile.referred_by);
+
+              await supabase
+                .from('coin_transactions')
+                .insert({
+                  user_id: profile.referred_by,
+                  amount: 100,
+                  transaction_type: 'earned',
+                  source: 'referral',
+                  description: 'Referral bonus - friend completed first mining'
+                });
+            }
           }
         }
       }
