@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Play, Trophy, BookOpen, Gift, Sparkles } from 'lucide-react';
+import { Play, Trophy, BookOpen, Gift, Sparkles, Calendar } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface QuickActionsProps {
@@ -11,9 +11,10 @@ interface QuickActionsProps {
   onNavigateToTasks?: () => void;
   onNavigateToRewards?: () => void;
   onNavigateToSpinWheel?: () => void;
+  onNavigateToDailyRewards?: () => void;
 }
 
-const QuickActions = ({ onNavigateToQuiz, onNavigateToTasks, onNavigateToRewards, onNavigateToSpinWheel }: QuickActionsProps) => {
+const QuickActions = ({ onNavigateToQuiz, onNavigateToTasks, onNavigateToRewards, onNavigateToSpinWheel, onNavigateToDailyRewards }: QuickActionsProps) => {
   const handleWatchAd = () => {
     toast({
       title: "📺 Watch Ad",
@@ -65,6 +66,17 @@ const QuickActions = ({ onNavigateToQuiz, onNavigateToTasks, onNavigateToRewards
     }
   };
 
+  const handleDailyRewards = () => {
+    if (onNavigateToDailyRewards) {
+      onNavigateToDailyRewards();
+    } else {
+      toast({
+        title: "📅 Daily Rewards",
+        description: "Claim your daily login rewards!",
+      });
+    }
+  };
+
   const actions = [
     {
       icon: Play,
@@ -73,6 +85,14 @@ const QuickActions = ({ onNavigateToQuiz, onNavigateToTasks, onNavigateToRewards
       color: 'bg-green-500',
       available: 8,
       onClick: handleWatchAd,
+    },
+    {
+      icon: Calendar,
+      title: 'Daily Rewards',
+      reward: 'Login bonus',
+      color: 'bg-blue-500',
+      available: null,
+      onClick: handleDailyRewards,
     },
     {
       icon: Sparkles,
@@ -94,7 +114,7 @@ const QuickActions = ({ onNavigateToQuiz, onNavigateToTasks, onNavigateToRewards
       icon: BookOpen,
       title: 'Daily Quiz',
       reward: 'Ready',
-      color: 'bg-blue-500',
+      color: 'bg-indigo-500',
       available: null,
       onClick: handleDailyQuiz,
     },
@@ -102,7 +122,7 @@ const QuickActions = ({ onNavigateToQuiz, onNavigateToTasks, onNavigateToRewards
       icon: Gift,
       title: 'Offers',
       reward: 'New offers',
-      color: 'bg-indigo-500',
+      color: 'bg-pink-500',
       available: null,
       onClick: handleOffers,
     },
