@@ -17,11 +17,11 @@ const TasksContainer: React.FC<TasksContainerProps> = ({
 }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-25 to-pink-50 pb-32">
-      <div className="space-y-6 p-4">
+      <div className="space-y-4 p-3 md:p-6">
         <TasksHeader tasks={tasks} />
 
-        {/* Enhanced Tasks List */}
-        <div className="space-y-4">
+        {/* Mobile-Optimized Tasks List */}
+        <div className="space-y-3 md:space-y-4">
           {tasks.map((task, index) => (
             <TaskItem
               key={task.id}
