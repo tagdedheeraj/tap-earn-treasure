@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Coins, Play, Trophy, Gift, Users, BookOpen, LogOut } from 'lucide-react';
+import { Coins, Play, Trophy, Gift, Users, BookOpen, LogOut, Copy, Check } from 'lucide-react';
 import MiningDashboard from '@/components/MiningDashboard';
 import QuickActions from '@/components/QuickActions';
 import CoinWallet from '@/components/CoinWallet';
@@ -22,6 +22,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [userLevel] = useState(5);
   const [loginStreak] = useState(3);
+  const [copied, setCopied] = useState(false);
 
   const tabConfig = [
     { id: 'home', label: 'Home', icon: Play },
@@ -30,6 +31,18 @@ const Index = () => {
     { id: 'rewards', label: 'Rewards', icon: Gift },
     { id: 'profile', label: 'Profile', icon: Users },
   ];
+
+  const handleCopyReferralCode = () => {
+    if (profile?.referral_code) {
+      navigator.clipboard.writeText(profile.referral_code);
+      setCopied(true);
+      toast({
+        title: "Referral Code Copied! 📋",
+        description: "Share with friends to earn 100 coins per successful referral!",
+      });
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   if (loading) {
     return (
@@ -92,25 +105,81 @@ const Index = () => {
                   </div>
                   <Button 
                     className="w-full bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700"
-                    onClick={() => {
-                      if (profile?.referral_code) {
-                        navigator.clipboard.writeText(profile.referral_code);
-                        // Could add toast here
-                      }
-                    }}
+                    onClick={handleCopyReferralCode}
                   >
-                    <Users className="w-4 h-4 mr-2" />
-                    Share Referral Code (1000 coins per referral!)
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={signOut}
-                  >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Sign Out
+                    {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+                    {copied ? 'Copied!' : 'Copy Referral Code'}
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Detailed Referral Program Card */}
+            <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+              <CardHeader>
+                <CardTitle className="text-xl text-green-700 flex items-center gap-2">
+                  <Users className="w-6 h-6" />
+                  Referral Program Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-white p-4 rounded-lg border border-green-200">
+                  <h3 className="font-semibold text-green-800 mb-2">How It Works:</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-start gap-2">
+                      <span className="bg-green-100 text-green-700 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">1</span>
+                      <span>Share your referral code with friends</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="bg-green-100 text-green-700 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">2</span>
+                      <span>Friend joins GiftLeap using your code</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="bg-green-100 text-green-700 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">3</span>
+                      <span>When friend completes their first mining (100 coins), you both get rewarded!</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-white p-3 rounded-lg border border-green-200 text-center">
+                    <div className="text-2xl font-bold text-green-600">100</div>
+                    <div className="text-sm text-gray-600">Coins for You</div>
+                  </div>
+                  <div className="bg-white p-3 rounded-lg border border-green-200 text-center">
+                    <div className="text-2xl font-bold text-blue-600">500</div>
+                    <div className="text-sm text-gray-600">Welcome Bonus for Friend</div>
+                  </div>
+                </div>
+
+                <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                  <h4 className="font-semibold text-yellow-800 mb-1">🎯 Pro Tips:</h4>
+                  <ul className="text-sm text-yellow-700 space-y-1">
+                    <li>• Unlimited referrals - no daily limits!</li>
+                    <li>• Bonus only applies when friend actively mines</li>
+                    <li>• Both accounts must be genuine (anti-fraud protection)</li>
+                    <li>• Track your referrals in the rewards section</li>
+                  </ul>
+                </div>
+
+                <div className="bg-purple-50 p-3 rounded-lg border border-purple-200 text-center">
+                  <p className="text-sm text-purple-700">
+                    <strong>Quick Math:</strong> 15 successful referrals = 1,500 coins = ₹50 Gift Card! 🎁
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-4 text-center">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={signOut}
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
               </CardContent>
             </Card>
           </div>
@@ -126,8 +195,8 @@ const Index = () => {
       <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 sticky top-0 z-10">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-xl font-bold">CoinMiner Pro</h1>
-            <p className="text-purple-100 text-sm">Earn coins daily!</p>
+            <h1 className="text-xl font-bold">GiftLeap</h1>
+            <p className="text-purple-100 text-sm">Earn. Leap. Redeem.</p>
           </div>
           <div className="flex items-center gap-2 bg-white/20 rounded-full px-3 py-1">
             <Coins className="w-5 h-5 text-yellow-300" />
