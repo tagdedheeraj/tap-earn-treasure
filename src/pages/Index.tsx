@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Coins, Play, Trophy, Gift, Users, BookOpen, LogOut, TrendingUp, Calendar, Star, Sparkles } from 'lucide-react';
+import { Coins, Play, Trophy, Gift, Users, BookOpen, LogOut, TrendingUp, Calendar, Star, Sparkles, Award } from 'lucide-react';
 import MiningDashboard from '@/components/MiningDashboard';
 import QuickActions from '@/components/QuickActions';
 import CoinWallet from '@/components/CoinWallet';
 import TasksList from '@/components/TasksList';
 import QuizSection from '@/components/QuizSection';
 import RewardsSection from '@/components/RewardsSection';
+import SpinWheel from '@/components/SpinWheel';
+import AchievementSystem from '@/components/AchievementSystem';
 import ProfileHeader from '@/components/ProfileHeader';
 import NotificationCenter from '@/components/NotificationCenter';
 import { useAuth } from '@/hooks/useAuth';
@@ -28,6 +30,8 @@ const Index = () => {
     { id: 'home', label: 'Home', icon: Play, gradient: 'from-blue-500 to-purple-500' },
     { id: 'tasks', label: 'Tasks', icon: Trophy, gradient: 'from-orange-500 to-red-500' },
     { id: 'quiz', label: 'Quiz', icon: BookOpen, gradient: 'from-green-500 to-emerald-500' },
+    { id: 'spin', label: 'Spin', icon: Sparkles, gradient: 'from-purple-500 to-pink-500' },
+    { id: 'achievements', label: 'Awards', icon: Award, gradient: 'from-yellow-500 to-orange-500' },
     { id: 'rewards', label: 'Rewards', icon: Gift, gradient: 'from-indigo-500 to-blue-500' },
     { id: 'profile', label: 'Profile', icon: Users, gradient: 'from-gray-500 to-slate-500' },
   ];
@@ -56,6 +60,14 @@ const Index = () => {
     });
   };
 
+  const handleNavigateToSpinWheel = () => {
+    setActiveTab('spin');
+    toast({
+      title: "🎰 Spin Wheel",
+      description: "Try your luck with the daily spin wheel!",
+    });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 flex items-center justify-center">
@@ -80,6 +92,7 @@ const Index = () => {
               onNavigateToQuiz={handleNavigateToQuiz}
               onNavigateToTasks={handleNavigateToTasks}
               onNavigateToRewards={handleNavigateToRewards}
+              onNavigateToSpinWheel={handleNavigateToSpinWheel}
             />
             <CoinWallet />
           </div>
@@ -88,6 +101,10 @@ const Index = () => {
         return <TasksList onNavigateToQuiz={handleNavigateToQuiz} />;
       case 'quiz':
         return <QuizSection />;
+      case 'spin':
+        return <SpinWheel />;
+      case 'achievements':
+        return <AchievementSystem />;
       case 'rewards':
         return <RewardsSection />;
       case 'profile':
@@ -263,7 +280,7 @@ const Index = () => {
       </div>
 
       {/* Enhanced Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200/50 px-2 py-3 shadow-2xl">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200/50 px-1 py-2 shadow-2xl">
         <div className="flex justify-around items-center max-w-md mx-auto">
           {tabConfig.map((tab) => {
             const Icon = tab.icon;
@@ -272,7 +289,7 @@ const Index = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`relative flex flex-col items-center py-2 px-3 rounded-2xl transition-all duration-300 transform ${
+                className={`relative flex flex-col items-center py-2 px-2 rounded-2xl transition-all duration-300 transform ${
                   isActive
                     ? `bg-gradient-to-r ${tab.gradient} text-white shadow-lg scale-110 -translate-y-1`
                     : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
@@ -281,7 +298,7 @@ const Index = () => {
                 {isActive && (
                   <div className="absolute inset-0 bg-white/20 rounded-2xl animate-pulse"></div>
                 )}
-                <Icon className={`w-6 h-6 relative z-10 ${isActive ? 'animate-bounce' : ''}`} />
+                <Icon className={`w-5 h-5 relative z-10 ${isActive ? 'animate-bounce' : ''}`} />
                 <span className={`text-xs mt-1 font-medium relative z-10 ${isActive ? 'font-bold' : ''}`}>
                   {tab.label}
                 </span>

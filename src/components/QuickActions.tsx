@@ -3,16 +3,17 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Play, Trophy, BookOpen, Gift } from 'lucide-react';
+import { Play, Trophy, BookOpen, Gift, Sparkles } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface QuickActionsProps {
   onNavigateToQuiz?: () => void;
   onNavigateToTasks?: () => void;
   onNavigateToRewards?: () => void;
+  onNavigateToSpinWheel?: () => void;
 }
 
-const QuickActions = ({ onNavigateToQuiz, onNavigateToTasks, onNavigateToRewards }: QuickActionsProps) => {
+const QuickActions = ({ onNavigateToQuiz, onNavigateToTasks, onNavigateToRewards, onNavigateToSpinWheel }: QuickActionsProps) => {
   const handleWatchAd = () => {
     toast({
       title: "📺 Watch Ad",
@@ -53,6 +54,17 @@ const QuickActions = ({ onNavigateToQuiz, onNavigateToTasks, onNavigateToRewards
     }
   };
 
+  const handleSpinWheel = () => {
+    if (onNavigateToSpinWheel) {
+      onNavigateToSpinWheel();
+    } else {
+      toast({
+        title: "🎰 Spin Wheel",
+        description: "Try your luck with the daily spin wheel!",
+      });
+    }
+  };
+
   const actions = [
     {
       icon: Play,
@@ -61,6 +73,14 @@ const QuickActions = ({ onNavigateToQuiz, onNavigateToTasks, onNavigateToRewards
       color: 'bg-green-500',
       available: 8,
       onClick: handleWatchAd,
+    },
+    {
+      icon: Sparkles,
+      title: 'Spin Wheel',
+      reward: 'Daily spin',
+      color: 'bg-purple-500',
+      available: null,
+      onClick: handleSpinWheel,
     },
     {
       icon: Trophy,
@@ -82,7 +102,7 @@ const QuickActions = ({ onNavigateToQuiz, onNavigateToTasks, onNavigateToRewards
       icon: Gift,
       title: 'Offers',
       reward: 'New offers',
-      color: 'bg-purple-500',
+      color: 'bg-indigo-500',
       available: null,
       onClick: handleOffers,
     },
