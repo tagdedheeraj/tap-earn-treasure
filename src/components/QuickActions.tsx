@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,9 +10,16 @@ interface QuickActionsProps {
   onNavigateToTasks?: () => void;
   onNavigateToRewards?: () => void;
   onNavigateToDailyRewards?: () => void;
+  onFeatureNavigation?: (featureId: string) => void;
 }
 
-const QuickActions = ({ onNavigateToQuiz, onNavigateToTasks, onNavigateToRewards, onNavigateToDailyRewards }: QuickActionsProps) => {
+const QuickActions = ({ 
+  onNavigateToQuiz, 
+  onNavigateToTasks, 
+  onNavigateToRewards, 
+  onNavigateToDailyRewards,
+  onFeatureNavigation 
+}: QuickActionsProps) => {
   const handleWatchAd = () => {
     toast({
       title: "📺 Watch Ad",
