@@ -92,9 +92,15 @@ const SpinWheel = () => {
 
       // Award the actual prize (not the displayed amount for 10K)
       if (wonReward.actualAward > 0) {
+        console.log('Awarding spin reward:', wonReward.actualAward);
         await updateCoins(wonReward.actualAward, 'spin_wheel', `Daily spin reward: ${wonReward.actualAward} points`);
         setTotalPointsToday(prev => prev + wonReward.actualAward);
-        await refetchData();
+        
+        // Force refresh user data to update the UI
+        setTimeout(async () => {
+          await refetchData();
+          console.log('User data refreshed after spin reward');
+        }, 500);
 
         toast({
           title: "🎉 Congratulations!",
