@@ -1,12 +1,11 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Star, BookOpen, TrendingUp, Award } from 'lucide-react';
-import MiningDashboard from '@/components/MiningDashboard';
-import QuickActions from '@/components/QuickActions';
-import CoinWallet from '@/components/CoinWallet';
-import { toast } from '@/hooks/use-toast';
+import { Trophy, Target, Users, Gift } from 'lucide-react';
+import MiningDashboard from './MiningDashboard';
+import QuickActions from './QuickActions';
+import CoinWallet from './CoinWallet';
+import MonthlyLimitDisplay from './MonthlyLimitDisplay';
 
 interface HomeContentProps {
   onNavigateToQuiz: () => void;
@@ -16,63 +15,64 @@ interface HomeContentProps {
   onFeatureNavigation: (featureId: string) => void;
 }
 
-const HomeContent = ({ 
-  onNavigateToQuiz, 
-  onNavigateToTasks, 
-  onNavigateToRewards, 
+const HomeContent: React.FC<HomeContentProps> = ({
+  onNavigateToQuiz,
+  onNavigateToTasks,
+  onNavigateToRewards,
   onNavigateToDailyRewards,
-  onFeatureNavigation 
-}: HomeContentProps) => {
-  const additionalFeatures = [
-    { id: 'quiz', label: 'Quiz Challenge', icon: BookOpen, gradient: 'from-green-500 to-emerald-500', description: 'Test your knowledge' },
-    { id: 'leaderboard', label: 'Leaderboard', icon: TrendingUp, gradient: 'from-yellow-500 to-orange-500', description: 'See your ranking' },
-    { id: 'achievements', label: 'Achievements', icon: Award, gradient: 'from-indigo-500 to-purple-500', description: 'Unlock badges' },
-  ];
-
+  onFeatureNavigation
+}) => {
   return (
     <div className="space-y-6">
+      {/* Monthly Limit Display */}
+      <MonthlyLimitDisplay />
+
+      {/* Main Mining Dashboard */}
       <MiningDashboard />
-      <QuickActions 
+
+      {/* Quick Actions */}
+      <QuickActions
         onNavigateToQuiz={onNavigateToQuiz}
         onNavigateToTasks={onNavigateToTasks}
         onNavigateToRewards={onNavigateToRewards}
         onNavigateToDailyRewards={onNavigateToDailyRewards}
+        onFeatureNavigation={onFeatureNavigation}
       />
+
+      {/* Coin Wallet */}
       <CoinWallet />
-      
-      {/* More Features Section */}
-      <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200 shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
-          <CardTitle className="text-xl flex items-center gap-2">
-            <Star className="w-6 h-6 text-yellow-300" />
-            More Features
+
+      {/* Achievements Section */}
+      <Card className="bg-gradient-to-r from-purple-100 to-pink-100 border-purple-200">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-yellow-500" />
+            Achievements
           </CardTitle>
+          <p className="text-sm text-gray-500">Track your progress and unlock rewards</p>
         </CardHeader>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 gap-4">
-            {additionalFeatures.map((feature) => {
-              const Icon = feature.icon;
-              return (
-                <Button
-                  key={feature.id}
-                  variant="outline"
-                  className="h-auto p-4 flex items-center gap-4 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 border-2 hover:border-purple-300"
-                  onClick={() => onFeatureNavigation(feature.id)}
-                >
-                  <div className={`w-12 h-12 rounded-2xl bg-gradient-to-r ${feature.gradient} text-white flex items-center justify-center shadow-lg`}>
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <div className="flex-1 text-left">
-                    <div className="font-semibold text-lg text-gray-800">{feature.label}</div>
-                    <div className="text-sm text-gray-600">{feature.description}</div>
-                  </div>
-                  <div className="text-purple-500">
-                    <Star className="w-5 h-5" />
-                  </div>
-                </Button>
-              );
-            })}
-          </div>
+        <CardContent>
+          <p className="text-gray-600">Complete tasks and challenges to earn achievements and bonus rewards.</p>
+          <Button size="sm" variant="secondary" onClick={() => onFeatureNavigation('achievements')}>
+            View All
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Leaderboard Preview */}
+      <Card className="bg-gradient-to-r from-green-100 to-blue-100 border-green-200">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold flex items-center gap-2">
+            <Users className="w-5 h-5 text-blue-500" />
+            Leaderboard
+          </CardTitle>
+          <p className="text-sm text-gray-500">See who's on top and compete for the crown</p>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-600">Compete with other users and climb the ranks to earn exclusive rewards.</p>
+          <Button size="sm" variant="secondary" onClick={() => onFeatureNavigation('leaderboard')}>
+            View Leaderboard
+          </Button>
         </CardContent>
       </Card>
     </div>

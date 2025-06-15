@@ -55,7 +55,16 @@ export const useDailyRewards = () => {
     const today = new Date().toDateString();
 
     try {
-      await updateCoins(todaysReward.reward, 'daily_reward', `Day ${state.currentDay} daily login reward`);
+      const result = await updateCoins(todaysReward.reward, 'daily_reward', `Day ${state.currentDay} daily login reward`);
+      
+      if (!result.success) {
+        toast({
+          title: "Cannot Claim Reward",
+          description: result.message,
+          variant: "destructive"
+        });
+        return;
+      }
       
       setState(prev => ({ ...prev, todaysClaimed: true }));
       localStorage.setItem('claimedDailyReward', today);
@@ -83,6 +92,7 @@ export const useDailyRewards = () => {
       toast({
         title: "❌ Error",
         description: "Failed to claim daily reward. Please try again.",
+        variant: "destructive"
       });
     }
   };

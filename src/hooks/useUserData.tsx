@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { toast } from '@/hooks/use-toast';
 
 interface UserProfile {
   id: string;
@@ -60,8 +61,51 @@ export const useUserData = () => {
     }
   };
 
+  const checkMonthlyLimit = async (amount: number, source: string) => {
+    if (!user || source === 'referral') return true; // Referral bonuses are unlimited
+
+    try {
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+      // Get current month earnings (excluding referral bonuses)
+      const { data: transactions, error } = await supabase
+        .from('coin_transactions')
+        .select('amount')
+        .eq('user_id', user.id)
+        .eq('transaction_type', 'earned')
+        .neq('source', 'referral')
+        .gte('created_at', startOfMonth.toISOString())
+        .lte('created_at', endOfMonth.toISOString());
+
+      if (error) throw error;
+
+      const totalEarned = transactions?.reduce((sum, t) => sum + t.amount, 0) || 0;
+      const MONTHLY_LIMIT = 1000;
+
+      return (totalEarned + amount) <= MONTHLY_LIMIT;
+    } catch (error) {
+      console.error('Error checking monthly limit:', error);
+      return false;
+    }
+  };
+
   const updateCoins = async (amount: number, source: string, description: string) => {
-    if (!user) return;
+    if (!user) return { success: false, message: 'User not authenticated' };
+
+    // Check monthly limit for earning transactions (excluding referrals)
+    if (amount > 0 && source !== 'referral') {
+      const canEarn = await checkMonthlyLimit(amount, source);
+      if (!canEarn) {
+        toast({
+          title: "Monthly Limit Reached",
+          description: "You have reached your monthly earning limit of 1000 points. Referral bonuses are still unlimited!",
+          variant: "destructive"
+        });
+        return { success: false, message: 'Monthly limit exceeded' };
+      }
+    }
 
     try {
       // Update wallet
@@ -108,8 +152,10 @@ export const useUserData = () => {
 
       // Refresh data
       await fetchUserData();
+      return { success: true, message: 'Coins updated successfully' };
     } catch (error) {
       console.error('Error updating coins:', error);
+      return { success: false, message: 'Failed to update coins' };
     }
   };
 
@@ -127,7 +173,7 @@ export const useUserData = () => {
         return;
       }
 
-      // Update referrer's wallet with 100 bonus points
+      // Update referrer's wallet with 100 bonus points (unlimited)
       const { error: walletUpdateError } = await supabase
         .from('coin_wallets')
         .update({
@@ -141,7 +187,7 @@ export const useUserData = () => {
         return;
       }
 
-      // Record referrer transaction
+      // Record referrer transaction (marked as referral source - unlimited)
       const { error: transactionError } = await supabase
         .from('coin_transactions')
         .insert({

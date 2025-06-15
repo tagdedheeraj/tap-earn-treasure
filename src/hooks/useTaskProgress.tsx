@@ -110,10 +110,14 @@ export const useTaskProgress = (onNavigateToQuiz?: () => void) => {
           const isCompleted = newProgress >= t.total;
           
           if (isCompleted) {
-            updateCoins(t.reward, 'task', `Task completion: ${t.title}`);
-            toast({
-              title: "🎉 Task Completed!",
-              description: `You earned ${t.reward} points!`,
+            // Use updateCoins which now checks monthly limits
+            updateCoins(t.reward, 'task', `Task completion: ${t.title}`).then((result) => {
+              if (result.success) {
+                toast({
+                  title: "🎉 Task Completed!",
+                  description: `You earned ${t.reward} points!`,
+                });
+              }
             });
           }
           
@@ -128,7 +132,7 @@ export const useTaskProgress = (onNavigateToQuiz?: () => void) => {
     );
   };
 
-  const onQuizCompleted = (score: number, points: number) => {
+  const onQuizCompleted = async (score: number, points: number) => {
     setQuizCompleted(true);
     
     // Update quiz task
@@ -152,25 +156,27 @@ export const useTaskProgress = (onNavigateToQuiz?: () => void) => {
   const checkWeeklyBonus = async () => {
     const weeklyTask = tasks.find(t => t.id === 5);
     if (weeklyTask && weeklyProgress >= 6 && !weeklyTask.completed) {
-      // Award weekly bonus
-      await updateCoins(200, 'task', 'Weekly bonus - completed all daily tasks');
-      toast({
-        title: "🎉 Weekly Bonus!",
-        description: "You earned 200 points for completing all daily tasks this week!",
-      });
-      
-      setTasks(prevTasks => 
-        prevTasks.map(task => {
-          if (task.id === 5) {
-            return {
-              ...task,
-              progress: 7,
-              completed: true
-            };
-          }
-          return task;
-        })
-      );
+      // Award weekly bonus (respecting monthly limits)
+      const result = await updateCoins(200, 'task', 'Weekly bonus - completed all daily tasks');
+      if (result.success) {
+        toast({
+          title: "🎉 Weekly Bonus!",
+          description: "You earned 200 points for completing all daily tasks this week!",
+        });
+        
+        setTasks(prevTasks => 
+          prevTasks.map(task => {
+            if (task.id === 5) {
+              return {
+                ...task,
+                progress: 7,
+                completed: true
+              };
+            }
+            return task;
+          })
+        );
+      }
     }
   };
 
