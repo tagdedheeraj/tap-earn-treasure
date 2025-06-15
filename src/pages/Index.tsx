@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import HomeContent from '@/components/HomeContent';
 import ProfileHeader from '@/components/ProfileHeader';
@@ -10,9 +10,65 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Shield, Settings } from 'lucide-react';
 import AdminAccessButton from '@/components/AdminAccessButton';
+import { toast } from '@/hooks/use-toast';
 
 const Index = () => {
   const { user, loading } = useAuth();
+  const [activeTab, setActiveTab] = useState('home');
+
+  // Mock data for components that require props
+  const mockProfile = {
+    username: user?.email?.split('@')[0] || 'User',
+    referral_code: 'REF123'
+  };
+  
+  const mockWallet = {
+    total_coins: 1250
+  };
+
+  // Navigation handlers
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    toast({
+      title: `Navigated to ${tab}`,
+      description: `${tab} feature coming soon!`,
+    });
+  };
+
+  const handleNavigateToQuiz = () => {
+    toast({
+      title: "Quiz Feature",
+      description: "Quiz section coming soon!",
+    });
+  };
+
+  const handleNavigateToTasks = () => {
+    toast({
+      title: "Tasks Feature", 
+      description: "Tasks section coming soon!",
+    });
+  };
+
+  const handleNavigateToRewards = () => {
+    toast({
+      title: "Rewards Feature",
+      description: "Rewards section coming soon!",
+    });
+  };
+
+  const handleNavigateToDailyRewards = () => {
+    toast({
+      title: "Daily Rewards Feature",
+      description: "Daily rewards section coming soon!",
+    });
+  };
+
+  const handleFeatureNavigation = (featureId: string) => {
+    toast({
+      title: `${featureId} Feature`,
+      description: `${featureId} feature coming soon!`,
+    });
+  };
 
   if (loading) {
     return <LoadingScreen />;
@@ -52,12 +108,32 @@ const Index = () => {
 
       {/* Main Content */}
       <div className="pb-20">
-        <ProfileHeader />
-        <QuickActions />
-        <HomeContent />
+        <ProfileHeader 
+          profile={mockProfile}
+          wallet={mockWallet}
+          userLevel={5}
+          loginStreak={7}
+        />
+        <QuickActions 
+          onNavigateToQuiz={handleNavigateToQuiz}
+          onNavigateToTasks={handleNavigateToTasks}
+          onNavigateToRewards={handleNavigateToRewards}
+          onNavigateToDailyRewards={handleNavigateToDailyRewards}
+          onFeatureNavigation={handleFeatureNavigation}
+        />
+        <HomeContent 
+          onNavigateToQuiz={handleNavigateToQuiz}
+          onNavigateToTasks={handleNavigateToTasks}
+          onNavigateToRewards={handleNavigateToRewards}
+          onNavigateToDailyRewards={handleNavigateToDailyRewards}
+          onFeatureNavigation={handleFeatureNavigation}
+        />
       </div>
       
-      <BottomNavigation />
+      <BottomNavigation 
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+      />
     </div>
   );
 };
