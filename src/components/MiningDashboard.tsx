@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,7 +12,7 @@ import { toast } from '@/hooks/use-toast';
 
 const MiningDashboard = () => {
   const { user } = useAuth();
-  const { updateCoins } = useUserData();
+  const { updateCoins, refetchData } = useUserData();
   const { notifyMiningCompleted } = useNotifications();
   const [miningData, setMiningData] = useState({
     mining_progress: 0,
@@ -172,6 +171,9 @@ const MiningDashboard = () => {
 
       // Send notification
       notifyMiningCompleted(pointsToAdd);
+
+      // Refresh user data to update the wallet balance in the header
+      await refetchData();
 
       setMiningData(prev => ({
         ...prev,
