@@ -14,7 +14,9 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminUsers from "./pages/AdminUsers";
 import AdminSettings from "./pages/AdminSettings";
 import AdminAnalytics from "./pages/AdminAnalytics";
+import AdminTest from "./pages/AdminTest";
 import AuthGuard from "./components/AuthGuard";
+import AdminGuard from "./components/admin/AdminGuard";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -47,11 +49,34 @@ const App: React.FC = () => {
                   </AuthGuard>
                 } />
                 
-                {/* Admin Routes */}
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/admin/users" element={<AdminUsers />} />
-                <Route path="/admin/settings" element={<AdminSettings />} />
-                <Route path="/admin/analytics" element={<AdminAnalytics />} />
+                {/* Admin Test Route - For debugging */}
+                <Route path="/admin-test" element={
+                  <AuthGuard>
+                    <AdminTest />
+                  </AuthGuard>
+                } />
+                
+                {/* Admin Routes - Now properly protected */}
+                <Route path="/admin" element={
+                  <AdminGuard>
+                    <AdminDashboard />
+                  </AdminGuard>
+                } />
+                <Route path="/admin/users" element={
+                  <AdminGuard>
+                    <AdminUsers />
+                  </AdminGuard>
+                } />
+                <Route path="/admin/settings" element={
+                  <AdminGuard>
+                    <AdminSettings />
+                  </AdminGuard>
+                } />
+                <Route path="/admin/analytics" element={
+                  <AdminGuard>
+                    <AdminAnalytics />
+                  </AdminGuard>
+                } />
                 
                 <Route path="*" element={<NotFound />} />
               </Routes>
