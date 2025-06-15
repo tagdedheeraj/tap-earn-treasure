@@ -1,11 +1,11 @@
 
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { HomeContent } from '@/components/HomeContent';
-import { ProfileHeader } from '@/components/ProfileHeader';
-import { QuickActions } from '@/components/QuickActions';
-import { BottomNavigation } from '@/components/BottomNavigation';
-import { LoadingScreen } from '@/components/LoadingScreen';
+import HomeContent from '@/components/HomeContent';
+import ProfileHeader from '@/components/ProfileHeader';
+import QuickActions from '@/components/QuickActions';
+import BottomNavigation from '@/components/BottomNavigation';
+import LoadingScreen from '@/components/LoadingScreen';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Shield, Settings } from 'lucide-react';
