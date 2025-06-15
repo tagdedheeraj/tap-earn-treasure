@@ -1,61 +1,85 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAdminAuth } from '@/hooks/useAdminAuth';
 import AdminGuard from '@/components/admin/AdminGuard';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search, Plus, Minus, Ban, CheckCircle } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
+import { Search, UserPlus, UserMinus, Coins } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
-interface User {
+interface UserProfile {
   id: string;
   username: string | null;
   referral_code: string;
+  referred_by: string | null;
   created_at: string;
+  email?: string;
+}
+
+interface UserWallet {
   total_coins: number;
-  is_admin: boolean;
+}
+
+interface UserData extends UserProfile {
+  wallet: UserWallet | null;
+  roles: string[];
 }
 
 const AdminUsers = () => {
-  const [users, setUsers] = useState<User[]>([]);
+  const { isAdmin, adminLoading } = useAdminAuth();
+  const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [coinAmount, setCoinAmount] = useState('');
-  const { toast } = useToast();
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    if (isAdmin && !adminLoading) {
+      fetchUsers();
+    }
+  }, [isAdmin, adminLoading]);
 
   const fetchUsers = async () => {
     try {
-      const { data: profilesData, error: profilesError } = await supabase
+      setLoading(true);
+      
+      // Fetch all profiles
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select(`
-          id,
-          username,
-          referral_code,
-          created_at,
-          coin_wallets(total_coins),
-          user_roles(role)
-        `);
+        .select('*')
+        .order('created_at', { ascending: false });
 
       if (profilesError) throw profilesError;
 
-      const usersWithCoins = profilesData?.map(profile => ({
-        id: profile.id,
-        username: profile.username,
-        referral_code: profile.referral_code,
-        created_at: profile.created_at,
-        total_coins: profile.coin_wallets?.[0]?.total_coins || 0,
-        is_admin: profile.user_roles?.some(role => role.role === 'admin') || false
-      })) || [];
+      // Fetch wallets for all users
+      const { data: wallets, error: walletsError } = await supabase
+        .from('coin_wallets')
+        .select('user_id, total_coins');
 
-      setUsers(usersWithCoins);
+      if (walletsError) throw walletsError;
+
+      // Fetch roles for all users
+      const { data: userRoles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role');
+
+      if (rolesError) throw rolesError;
+
+      // Combine the data
+      const usersData: UserData[] = profiles?.map((profile) => {
+        const wallet = wallets?.find(w => w.user_id === profile.id);
+        const roles = userRoles?.filter(r => r.user_id === profile.id).map(r => r.role) || [];
+        
+        return {
+          ...profile,
+          wallet: wallet || null,
+          roles
+        };
+      }) || [];
+
+      setUsers(usersData);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
@@ -68,65 +92,31 @@ const AdminUsers = () => {
     }
   };
 
-  const filteredUsers = users.filter(user =>
-    user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.referral_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const updateUserCoins = async (userId: string, amount: number, action: 'add' | 'subtract') => {
+  const updateUserCoins = async (userId: string, newAmount: number) => {
     try {
-      const user = users.find(u => u.id === userId);
-      if (!user) return;
-
-      const finalAmount = action === 'add' ? amount : -amount;
-      const newTotal = Math.max(0, user.total_coins + finalAmount);
-
-      // Update wallet
-      const { error: walletError } = await supabase
+      const { error } = await supabase
         .from('coin_wallets')
-        .update({ 
-          total_coins: newTotal,
-          updated_at: new Date().toISOString()
-        })
+        .update({ total_coins: newAmount })
         .eq('user_id', userId);
 
-      if (walletError) throw walletError;
-
-      // Add transaction record
-      const { error: transactionError } = await supabase
-        .from('coin_transactions')
-        .insert({
-          user_id: userId,
-          amount: Math.abs(finalAmount),
-          transaction_type: finalAmount > 0 ? 'earned' : 'spent',
-          source: 'admin',
-          description: `Admin ${action === 'add' ? 'added' : 'subtracted'} ${Math.abs(finalAmount)} coins`
-        });
-
-      if (transactionError) throw transactionError;
+      if (error) throw error;
 
       // Log admin action
-      const { error: actionError } = await supabase
+      await supabase
         .from('admin_actions')
         .insert({
-          admin_id: (await supabase.auth.getUser()).data.user?.id || '',
-          action_type: 'coin_adjustment',
+          action_type: 'update_coins',
           target_user_id: userId,
-          description: `${action === 'add' ? 'Added' : 'Subtracted'} ${Math.abs(finalAmount)} coins`,
-          metadata: { amount: finalAmount, new_total: newTotal }
+          description: `Updated user coins to ${newAmount}`,
+          metadata: { previous_amount: users.find(u => u.id === userId)?.wallet?.total_coins }
         });
-
-      if (actionError) throw actionError;
 
       toast({
         title: "Success",
-        description: `Successfully ${action === 'add' ? 'added' : 'subtracted'} ${Math.abs(finalAmount)} coins`,
+        description: "User coins updated successfully"
       });
 
-      await fetchUsers();
-      setCoinAmount('');
-      setSelectedUser(null);
+      fetchUsers();
     } catch (error) {
       console.error('Error updating coins:', error);
       toast({
@@ -137,25 +127,25 @@ const AdminUsers = () => {
     }
   };
 
-  const toggleAdminRole = async (userId: string, isCurrentlyAdmin: boolean) => {
+  const toggleUserRole = async (userId: string, role: 'admin' | 'user') => {
     try {
-      if (isCurrentlyAdmin) {
-        // Remove admin role
+      const user = users.find(u => u.id === userId);
+      const hasRole = user?.roles.includes(role);
+
+      if (hasRole) {
+        // Remove role
         const { error } = await supabase
           .from('user_roles')
           .delete()
           .eq('user_id', userId)
-          .eq('role', 'admin');
+          .eq('role', role);
 
         if (error) throw error;
       } else {
-        // Add admin role
+        // Add role
         const { error } = await supabase
           .from('user_roles')
-          .insert({
-            user_id: userId,
-            role: 'admin'
-          });
+          .insert({ user_id: userId, role });
 
         if (error) throw error;
       }
@@ -164,21 +154,20 @@ const AdminUsers = () => {
       await supabase
         .from('admin_actions')
         .insert({
-          admin_id: (await supabase.auth.getUser()).data.user?.id || '',
-          action_type: 'role_change',
+          action_type: hasRole ? 'remove_role' : 'add_role',
           target_user_id: userId,
-          description: `${isCurrentlyAdmin ? 'Removed' : 'Granted'} admin role`,
-          metadata: { new_role: isCurrentlyAdmin ? 'user' : 'admin' }
+          description: `${hasRole ? 'Removed' : 'Added'} ${role} role`,
+          metadata: { role }
         });
 
       toast({
         title: "Success",
-        description: `Successfully ${isCurrentlyAdmin ? 'removed' : 'granted'} admin role`,
+        description: `User role ${hasRole ? 'removed' : 'added'} successfully`
       });
 
-      await fetchUsers();
+      fetchUsers();
     } catch (error) {
-      console.error('Error updating role:', error);
+      console.error('Error updating user role:', error);
       toast({
         title: "Error",
         description: "Failed to update user role",
@@ -187,7 +176,13 @@ const AdminUsers = () => {
     }
   };
 
-  if (loading) {
+  const filteredUsers = users.filter(user =>
+    user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.referral_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.id.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (adminLoading || loading) {
     return (
       <AdminGuard>
         <AdminLayout>
@@ -203,156 +198,97 @@ const AdminUsers = () => {
     <AdminGuard>
       <AdminLayout>
         <div className="space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-            <p className="text-gray-600">Manage all registered users and their accounts</p>
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold">User Management</h1>
+            <Button onClick={fetchUsers}>Refresh Data</Button>
           </div>
 
           {/* Search */}
           <Card>
             <CardContent className="p-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <div className="flex items-center space-x-2">
+                <Search className="w-5 h-5 text-gray-400" />
                 <Input
-                  placeholder="Search users by username, referral code, or ID..."
+                  placeholder="Search users by username, ID, or referral code..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="flex-1"
                 />
               </div>
             </CardContent>
           </Card>
 
-          {/* Users Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Users ({filteredUsers.length})</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Username</TableHead>
-                    <TableHead>Referral Code</TableHead>
-                    <TableHead>Total Coins</TableHead>
-                    <TableHead>Joined</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">
-                        {user.username || 'Anonymous'}
-                      </TableCell>
-                      <TableCell>{user.referral_code}</TableCell>
-                      <TableCell>{user.total_coins.toLocaleString()}</TableCell>
-                      <TableCell>
-                        {new Date(user.created_at).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          user.is_admin 
-                            ? 'bg-red-100 text-red-800' 
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {user.is_admin ? 'Admin' : 'User'}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setSelectedUser(user)}
-                          >
-                            Manage Coins
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant={user.is_admin ? "destructive" : "default"}
-                            onClick={() => toggleAdminRole(user.id, user.is_admin)}
-                          >
-                            {user.is_admin ? (
-                              <>
-                                <Ban className="w-4 h-4 mr-1" />
-                                Remove Admin
-                              </>
-                            ) : (
-                              <>
-                                <CheckCircle className="w-4 h-4 mr-1" />
-                                Make Admin
-                              </>
-                            )}
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-
-          {/* Coin Management Modal */}
-          {selectedUser && (
-            <Card className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
-                <h3 className="text-lg font-semibold mb-4">
-                  Manage Coins for {selectedUser.username || 'Anonymous'}
-                </h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  Current Balance: {selectedUser.total_coins.toLocaleString()} coins
-                </p>
-                <div className="space-y-4">
-                  <Input
-                    type="number"
-                    placeholder="Enter amount"
-                    value={coinAmount}
-                    onChange={(e) => setCoinAmount(e.target.value)}
-                  />
-                  <div className="flex space-x-2">
-                    <Button
-                      className="flex-1"
-                      onClick={() => {
-                        const amount = parseInt(coinAmount);
-                        if (amount > 0) {
-                          updateUserCoins(selectedUser.id, amount, 'add');
+          {/* Users List */}
+          <div className="grid gap-4">
+            {filteredUsers.map((user) => (
+              <Card key={user.id}>
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        {user.username || 'No Username'}
+                        {user.roles.includes('admin') && (
+                          <Badge variant="destructive">Admin</Badge>
+                        )}
+                      </CardTitle>
+                      <p className="text-sm text-gray-600">ID: {user.id}</p>
+                      <p className="text-sm text-gray-600">Referral: {user.referral_code}</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="flex items-center gap-1 text-lg font-bold">
+                        <Coins className="w-5 h-5 text-yellow-600" />
+                        {user.wallet?.total_coins || 0}
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        Joined: {new Date(user.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    <Input
+                      type="number"
+                      placeholder="New coin amount"
+                      className="w-40"
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          const newAmount = parseInt((e.target as HTMLInputElement).value);
+                          if (!isNaN(newAmount) && newAmount >= 0) {
+                            updateUserCoins(user.id, newAmount);
+                            (e.target as HTMLInputElement).value = '';
+                          }
                         }
                       }}
-                      disabled={!coinAmount || parseInt(coinAmount) <= 0}
-                    >
-                      <Plus className="w-4 h-4 mr-1" />
-                      Add Coins
-                    </Button>
+                    />
                     <Button
-                      variant="destructive"
-                      className="flex-1"
-                      onClick={() => {
-                        const amount = parseInt(coinAmount);
-                        if (amount > 0) {
-                          updateUserCoins(selectedUser.id, amount, 'subtract');
-                        }
-                      }}
-                      disabled={!coinAmount || parseInt(coinAmount) <= 0}
+                      size="sm"
+                      variant={user.roles.includes('admin') ? 'destructive' : 'default'}
+                      onClick={() => toggleUserRole(user.id, 'admin')}
                     >
-                      <Minus className="w-4 h-4 mr-1" />
-                      Subtract Coins
+                      {user.roles.includes('admin') ? (
+                        <>
+                          <UserMinus className="w-4 h-4 mr-1" />
+                          Remove Admin
+                        </>
+                      ) : (
+                        <>
+                          <UserPlus className="w-4 h-4 mr-1" />
+                          Make Admin
+                        </>
+                      )}
                     </Button>
                   </div>
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => {
-                      setSelectedUser(null);
-                      setCoinAmount('');
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {filteredUsers.length === 0 && (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <p className="text-gray-600">No users found matching your search.</p>
+              </CardContent>
             </Card>
           )}
         </div>
