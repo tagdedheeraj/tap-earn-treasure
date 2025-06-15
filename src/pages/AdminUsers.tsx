@@ -30,7 +30,7 @@ interface UserData extends UserProfile {
 }
 
 const AdminUsers = () => {
-  const { isAdmin, adminLoading } = useAdminAuth();
+  const { isAdmin, adminLoading, user } = useAdminAuth();
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -93,6 +93,8 @@ const AdminUsers = () => {
   };
 
   const updateUserCoins = async (userId: string, newAmount: number) => {
+    if (!user) return;
+
     try {
       const { error } = await supabase
         .from('coin_wallets')
@@ -105,6 +107,7 @@ const AdminUsers = () => {
       await supabase
         .from('admin_actions')
         .insert({
+          admin_id: user.id,
           action_type: 'update_coins',
           target_user_id: userId,
           description: `Updated user coins to ${newAmount}`,
@@ -128,9 +131,11 @@ const AdminUsers = () => {
   };
 
   const toggleUserRole = async (userId: string, role: 'admin' | 'user') => {
+    if (!user) return;
+
     try {
-      const user = users.find(u => u.id === userId);
-      const hasRole = user?.roles.includes(role);
+      const targetUser = users.find(u => u.id === userId);
+      const hasRole = targetUser?.roles.includes(role);
 
       if (hasRole) {
         // Remove role
@@ -154,6 +159,7 @@ const AdminUsers = () => {
       await supabase
         .from('admin_actions')
         .insert({
+          admin_id: user.id,
           action_type: hasRole ? 'remove_role' : 'add_role',
           target_user_id: userId,
           description: `${hasRole ? 'Removed' : 'Added'} ${role} role`,
