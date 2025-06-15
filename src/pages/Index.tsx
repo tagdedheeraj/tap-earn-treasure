@@ -1,131 +1,63 @@
-import React, { useState } from 'react';
-import DailyRewards from '@/components/DailyRewards';
-import TasksList from '@/components/TasksList';
-import QuizSection from '@/components/QuizSection';
-import RewardsSection from '@/components/RewardsSection';
-import AchievementSystem from '@/components/AchievementSystem';
-import Leaderboard from '@/components/Leaderboard';
-import LoadingScreen from '@/components/LoadingScreen';
-import AppHeader from '@/components/AppHeader';
-import BottomNavigation from '@/components/BottomNavigation';
-import HomeContent from '@/components/HomeContent';
-import ProfileContent from '@/components/ProfileContent';
-import SpinWheel from '@/components/SpinWheel';
+
+import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useUserData } from '@/hooks/useUserData';
-import { toast } from '@/hooks/use-toast';
+import { HomeContent } from '@/components/HomeContent';
+import { ProfileHeader } from '@/components/ProfileHeader';
+import { QuickActions } from '@/components/QuickActions';
+import { BottomNavigation } from '@/components/BottomNavigation';
+import { LoadingScreen } from '@/components/LoadingScreen';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { Shield, Settings } from 'lucide-react';
+import AdminAccessButton from '@/components/AdminAccessButton';
 
 const Index = () => {
-  const { signOut } = useAuth();
-  const { profile, wallet, loading } = useUserData();
-  const [activeTab, setActiveTab] = useState('home');
-  const [userLevel] = useState(5);
-  const [loginStreak] = useState(3);
-
-  const handleNavigateToQuiz = () => {
-    setActiveTab('quiz');
-    toast({
-      title: "🧠 Quiz Time!",
-      description: "Answer questions correctly to earn points!",
-    });
-  };
-
-  const handleNavigateToTasks = () => {
-    setActiveTab('tasks');
-    toast({
-      title: "📋 Daily Tasks",
-      description: "Complete tasks to earn coins and rewards!",
-    });
-  };
-
-  const handleNavigateToRewards = () => {
-    setActiveTab('rewards');
-    toast({
-      title: "🎁 Rewards",
-      description: "Check out available rewards and offers!",
-    });
-  };
-
-  const handleNavigateToDailyRewards = () => {
-    setActiveTab('daily');
-    toast({
-      title: "📅 Daily Rewards",
-      description: "Claim your daily login bonus!",
-    });
-  };
-
-  const handleFeatureNavigation = (featureId: string) => {
-    setActiveTab(featureId);
-    const featureLabels: { [key: string]: string } = {
-      quiz: 'Quiz Challenge',
-      leaderboard: 'Leaderboard',
-      achievements: 'Achievements'
-    };
-    
-    const featureLabel = featureLabels[featureId];
-    if (featureLabel) {
-      toast({
-        title: `🎯 ${featureLabel}`,
-        description: `Navigated to ${featureLabel}`,
-      });
-    }
-  };
+  const { user, loading } = useAuth();
 
   if (loading) {
     return <LoadingScreen />;
   }
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'home':
-        return (
-          <HomeContent
-            onNavigateToQuiz={handleNavigateToQuiz}
-            onNavigateToTasks={handleNavigateToTasks}
-            onNavigateToRewards={handleNavigateToRewards}
-            onNavigateToDailyRewards={handleNavigateToDailyRewards}
-            onFeatureNavigation={handleFeatureNavigation}
-          />
-        );
-      case 'daily':
-        return <DailyRewards />;
-      case 'tasks':
-        return <TasksList onNavigateToQuiz={handleNavigateToQuiz} />;
-      case 'spin':
-        return <SpinWheel />;
-      case 'quiz':
-        return <QuizSection />;
-      case 'leaderboard':
-        return <Leaderboard />;
-      case 'achievements':
-        return <AchievementSystem />;
-      case 'rewards':
-        return <RewardsSection />;
-      case 'profile':
-        return (
-          <ProfileContent
-            profile={profile}
-            wallet={wallet}
-            userLevel={userLevel}
-            loginStreak={loginStreak}
-            onSignOut={signOut}
-          />
-        );
-      default:
-        return null;
-    }
-  };
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Welcome to App</h1>
+          <p className="text-gray-600 mb-8">Please login to continue</p>
+          <Link to="/auth">
+            <Button size="lg" className="bg-purple-600 hover:bg-purple-700">
+              Login / Sign Up
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-25 to-pink-50">
-      <AppHeader totalCoins={wallet?.total_coins || 0} />
-
-      {/* Main Content */}
-      <div className="p-4 pb-24">
-        {renderContent()}
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
+      {/* Header with Admin Access */}
+      <div className="flex justify-between items-center p-4 bg-white/80 backdrop-blur-sm border-b">
+        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <div className="flex items-center gap-2">
+          <Link to="/admin-test">
+            <Button variant="outline" size="sm">
+              <Settings className="w-4 h-4 mr-2" />
+              Admin Test
+            </Button>
+          </Link>
+          <AdminAccessButton />
+        </div>
       </div>
 
-      <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+      {/* Main Content */}
+      <div className="pb-20">
+        <ProfileHeader />
+        <QuickActions />
+        <HomeContent />
+      </div>
+      
+      <BottomNavigation />
     </div>
   );
 };

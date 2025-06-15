@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Shield, User } from 'lucide-react';
+import { Shield, User, Settings } from 'lucide-react';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'react-router-dom';
@@ -47,13 +47,15 @@ const AdminAccessButton = () => {
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm text-gray-600">
-        Logged in as: {user.email}
+      <span className="text-sm text-gray-600 hidden md:block">
+        {user.email}
       </span>
-      <Button variant="outline" size="sm" disabled>
-        <User className="w-4 h-4 mr-2" />
-        User
-      </Button>
+      <Link to="/admin-test">
+        <Button variant="outline" size="sm">
+          <Settings className="w-4 h-4 mr-2" />
+          Get Admin Access
+        </Button>
+      </Link>
     </div>
   );
 };
