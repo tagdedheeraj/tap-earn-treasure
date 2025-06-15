@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import DailyRewards from '@/components/DailyRewards';
 import TasksList from '@/components/TasksList';
@@ -11,6 +10,7 @@ import AppHeader from '@/components/AppHeader';
 import BottomNavigation from '@/components/BottomNavigation';
 import HomeContent from '@/components/HomeContent';
 import ProfileContent from '@/components/ProfileContent';
+import SpinWheel from '@/components/SpinWheel';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserData } from '@/hooks/useUserData';
 import { toast } from '@/hooks/use-toast';
@@ -91,6 +91,8 @@ const Index = () => {
         return <DailyRewards />;
       case 'tasks':
         return <TasksList onNavigateToQuiz={handleNavigateToQuiz} />;
+      case 'spin':
+        return <SpinWheel />;
       case 'quiz':
         return <QuizSection />;
       case 'leaderboard':
